@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Kanban.Models;
+using Kanban.Enums;
 
 namespace Kanban.Repositories
 {
@@ -7,6 +8,7 @@ namespace Kanban.Repositories
   {
     public void CrearUsuario(Usuario usuario);
     public void ModificarUsuario(int Id, Usuario usuario);
+    public List<Usuario> ObtenerUsuarios();
   }
 
   public class UsuarioRepository : IUsuarioRepository
@@ -54,6 +56,34 @@ namespace Kanban.Repositories
 
         connection.Close();
       }
+    }
+
+    public List<Usuario> ObtenerUsuarios()
+    {
+      List<Usuario> usuarios = new List<Usuario>();
+      string query = @"SELECT id, nombre_de_usuario, rol_usuario FROM Usuario;";
+      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      {
+        connection.Open();
+
+        SqliteCommand command = new SqliteCommand(query, connection);
+
+        using (SqliteDataReader reader = command.ExecuteReader())
+        {
+          while (reader.Read())
+          {
+            usuarios.Add(new Usuario
+            {
+              Id = reader.GetInt32(0),
+              NombreDeUsuario = reader.GetString(1),
+              RolUsuario = (RolUsuario)reader.GetInt32(2)
+            });
+          }
+        }
+        connection.Close();
+      }
+
+      return usuarios;
     }
 
   }
