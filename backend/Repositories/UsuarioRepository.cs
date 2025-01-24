@@ -9,6 +9,7 @@ namespace Kanban.Repositories
     public void CrearUsuario(Usuario usuario);
     public void ModificarUsuario(int Id, Usuario usuario);
     public List<Usuario> ObtenerUsuarios();
+    public Usuario ObtenerUsuarioId(int id);
   }
 
   public class UsuarioRepository : IUsuarioRepository
@@ -84,6 +85,32 @@ namespace Kanban.Repositories
       }
 
       return usuarios;
+    }
+
+    public Usuario ObtenerUsuarioId(int id)
+    {
+      Usuario usuarioBuscado = null;
+      string query = @"SELECT nombre_de_usuario, password, rol_usuario FROM Usuario WHERE id = @Id;";
+      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      {
+        connection.Open();
+
+        SqliteCommand command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@Id", id);
+        using (SqliteDataReader reader = command.ExecuteReader())
+        {
+          while (reader.Read())
+          {
+            usuarioBuscado.Id = reader.GetInt32(0);
+            usuarioBuscado.NombreDeUsuario = reader.GetString(1);
+            usuarioBuscado.RolUsuario = (RolUsuario)reader.GetInt32(2);
+          }
+        }
+
+        connection.Close();
+      }
+      return usuarioBuscado;
     }
 
   }
