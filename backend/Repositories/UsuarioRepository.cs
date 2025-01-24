@@ -11,6 +11,7 @@ namespace Kanban.Repositories
     public List<Usuario> ObtenerUsuarios();
     public Usuario ObtenerUsuarioId(int id);
     public void EliminarUsuario(int id);
+    public void CambiarPassword(int id, Usuario usuario);
   }
 
   public class UsuarioRepository : IUsuarioRepository
@@ -129,6 +130,24 @@ namespace Kanban.Repositories
         SqliteCommand command = new SqliteCommand(query, connection);
 
         command.Parameters.AddWithValue("@Id", id);
+        command.ExecuteNonQuery();
+
+        connection.Close();
+      }
+    }
+
+    public void CambiarPassword(int id, Usuario usuario)
+    {
+      string query = @"UPDATE Usuario SET password = @Password WHERE id = @Id;";
+      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      {
+        connection.Open();
+
+        SqliteCommand command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@Id", id);
+        command.Parameters.AddWithValue("@Password", usuario.Password);
+
         command.ExecuteNonQuery();
 
         connection.Close();
