@@ -10,6 +10,7 @@ namespace Kanban.Repositories
     public void ModificarUsuario(int Id, Usuario usuario);
     public List<Usuario> ObtenerUsuarios();
     public Usuario ObtenerUsuarioId(int id);
+    public void EliminarUsuario(int id);
   }
 
   public class UsuarioRepository : IUsuarioRepository
@@ -113,5 +114,49 @@ namespace Kanban.Repositories
       return usuarioBuscado;
     }
 
+    public void EliminarUsuario(int id)
+    {
+      if (Verificar(id))
+      {
+        throw new InvalidOperationException("El usuario está asociado a tableros o tareas y no puede ser eliminado.");
+      }
+
+      string query = @"DELETE FROM Usuario WHERE id = @Id;";
+      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      {
+        connection.Open();
+
+        SqliteCommand command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@Id", id);
+        command.ExecuteNonQuery();
+
+        connection.Close();
+      }
+    }
+
+    private bool Verificar(int id)
+    {
+      int contador;
+      string query = @"
+        SELECT COUNT(*)
+        FROM Usuario u
+        LEFT JOIN Tablero t ON u.id = id_usuario_propietario
+        LEFT JOIN Tarea ta ON u.id = ta.id_usuario_asignado
+        WHERE u.id = @Id;";
+      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      {
+        connection.Open();
+
+        SqliteCommand command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@Id", id);
+
+        contador = Convert.ToInt32(command.ExecuteScalar());
+
+        connection.Close();
+      }
+      return contador > 0;
+    }
   }
 }
