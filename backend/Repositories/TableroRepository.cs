@@ -63,7 +63,7 @@ public class TableroRepository : ITableroRepository
   public Tablero ObtenerDetalles(int id)
   {
     Tablero tableroBuscado = new Tablero();
-    string query = @"";
+    string query = @"SELECT id_usuario_propietario, nombre, descripcion FROM Tablero WHERE id = @Id";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -78,14 +78,40 @@ public class TableroRepository : ITableroRepository
           tableroBuscado.IdUsuarioPropietario = reader.GetInt32(1);
           tableroBuscado.Nombre = reader.GetString(2);
           tableroBuscado.Descripcion = reader.GetString(3);
-
         }
       }
-
 
       connection.Close();
     }
     return tableroBuscado;
+  }
+
+  public List<Tablero> ObtenerTableros()
+  {
+    List<Tablero> tableros = new List<Tablero>();
+    string query = @"SELECT id_usuario_propietario, nombre, descripcion FROM Tablero;";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      using (SqliteDataReader reader = command.ExecuteReader())
+      {
+        while (reader.Read())
+        {
+          tableros.Add(new Tablero
+          {
+            IdUsuarioPropietario = reader.GetInt32(0),
+            Nombre = reader.GetString(1),
+            Descripcion = reader.GetString(2)
+          });
+        }
+      }
+
+      connection.Close();
+    }
+    return tableros;
   }
 
 }
