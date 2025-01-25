@@ -9,7 +9,7 @@ public interface ITableroRepository
   public void ModificarTablero(int id, Tablero tablero);
   public Tablero ObtenerDetalles(int id);
   public List<Tablero> ObtenerTableros();
-  public List<Tablero> ObtenerTablerosId();
+  public List<Tablero> ObtenerTablerosId(int id);
   public void EliminarTablero(int id);
 }
 
@@ -112,6 +112,34 @@ public class TableroRepository : ITableroRepository
       connection.Close();
     }
     return tableros;
+  }
+
+  public List<Tablero> ObtenerTablerosId(int id)
+  {
+    List<Tablero> tablerosBuscado = new List<Tablero>();
+    string query = @"";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      using (SqliteDataReader reader = command.ExecuteReader())
+      {
+        while (reader.Read())
+        {
+          tablerosBuscado.Add(new Tablero
+          {
+            IdUsuarioPropietario = reader.GetInt32(0),
+            Nombre = reader.GetString(1),
+            Descripcion = reader.GetString(2)
+          });
+        }
+      }
+
+      connection.Close();
+    }
+    return tablerosBuscado;
   }
 
 }
