@@ -59,4 +59,33 @@ public class TableroRepository : ITableroRepository
       connection.Close();
     }
   }
+
+  public Tablero ObtenerDetalles(int id)
+  {
+    Tablero tableroBuscado = new Tablero();
+    string query = @"";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      using (SqliteDataReader reader = command.ExecuteReader())
+      {
+        while (reader.Read())
+        {
+          tableroBuscado.Id = reader.GetInt32(0);
+          tableroBuscado.IdUsuarioPropietario = reader.GetInt32(1);
+          tableroBuscado.Nombre = reader.GetString(2);
+          tableroBuscado.Descripcion = reader.GetString(3);
+
+        }
+      }
+
+
+      connection.Close();
+    }
+    return tableroBuscado;
+  }
+
 }

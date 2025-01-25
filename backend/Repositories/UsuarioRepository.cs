@@ -91,7 +91,7 @@ namespace Kanban.Repositories
 
     public Usuario ObtenerUsuarioId(int id)
     {
-      Usuario usuarioBuscado = null;
+      Usuario usuarioBuscado = new Usuario();
       string query = @"SELECT nombre_de_usuario, password, rol_usuario FROM Usuario WHERE id = @Id;";
       using (SqliteConnection connection = new SqliteConnection(_connectionString))
       {
