@@ -32,4 +32,20 @@ public class TableroController : ControllerBase
     }
   }
 
+  [HttpPost]
+  public IActionResult Crear(Tablero tablero)
+  {
+    try
+    {
+      Tablero nuevoTablero = _tableroRepository.CrearTablero(tablero);
+      return Created("api/Tablero", nuevoTablero);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw new Exception("Error al obtener los tableros");
+    }
+
+  }
+
 }
