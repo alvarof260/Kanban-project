@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Kanban.Models;
 using Kanban.Repositories;
+using Kanban.DTO;
 
 namespace Kanban.Controllers;
 
@@ -47,4 +48,18 @@ public class UsuarioController : ControllerBase
     }
   }
 
+  [HttpPut("/{id}")]
+  public IActionResult Modificar(int id, [FromBody] UsuarioDTO usuario)
+  {
+    try
+    {
+      _usuarioRepository.ModificarUsuario(id, usuario);
+      return Ok("Usuario modificado");
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw new Exception("Error al modificar al usuario");
+    }
+  }
 }

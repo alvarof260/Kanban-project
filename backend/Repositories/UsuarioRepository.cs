@@ -1,13 +1,14 @@
 using Microsoft.Data.Sqlite;
 using Kanban.Models;
 using Kanban.Enums;
+using Kanban.DTO;
 
 namespace Kanban.Repositories
 {
   public interface IUsuarioRepository
   {
     public Usuario CrearUsuario(Usuario usuario);
-    public void ModificarUsuario(int Id, Usuario usuario);
+    public void ModificarUsuario(int Id, UsuarioDTO usuario);
     public List<Usuario> ObtenerUsuarios();
     public Usuario ObtenerUsuarioId(int id);
     public void EliminarUsuario(int id);
@@ -45,21 +46,32 @@ namespace Kanban.Repositories
       return usuario;
     }
 
-    public void ModificarUsuario(int id, Usuario usuario)
+    public void ModificarUsuario(int id, UsuarioDTO usuario)
     {
-      string query = @"UPDATE Usuario SET nombre_de_usuario = @NombreDeUsuario, rol_usuario = @RolUsuario WHERE id = @Id;";
+      string query = @"
+        UPDATE Usuario 
+        SET 
+            nombre_de_usuario = COALESCE(@NombreDeUsuario, nombre_de_usuario),
+            password = COALESCE(@Password, password),
+            rol_usuario = COALESCE(@RolUsuario, rol_usuario)
+        WHERE id = @Id;";
+
       using (SqliteConnection connection = new SqliteConnection(_connectionString))
       {
         connection.Open();
 
         SqliteCommand command = new SqliteCommand(query, connection);
+        command.Parameters.AddWithValue("@Id", id);
 
-        command.Parameters.AddWithValue("@NombreDeUsuario", usuario.NombreDeUsuario);
-        command.Parameters.AddWithValue("@RolUsuario", usuario.RolUsuario);
-        command.Parameters.AddWithValue("@id", usuario.Id);
+        // Asigna valores solo si están presentes en el DTO
+        command.Parameters.AddWithValue("@NombreDeUsuario",
+            string.IsNullOrEmpty(usuario.NombreDeUsuario) ? DBNull.Value : usuario.NombreDeUsuario);
+        command.Parameters.AddWithValue("@Password",
+            string.IsNullOrEmpty(usuario.Password) ? DBNull.Value : usuario.Password);
+        command.Parameters.AddWithValue("@RolUsuario",
+            usuario.RolUsuario.HasValue ? usuario.RolUsuario : DBNull.Value);
 
         command.ExecuteNonQuery();
-
         connection.Close();
       }
     }
