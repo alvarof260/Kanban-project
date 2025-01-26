@@ -132,7 +132,7 @@ namespace Kanban.Repositories
 
     public void EliminarUsuario(int id)
     {
-      if (Verificar(id))
+      if (!Verificar(id))
       {
         throw new InvalidOperationException("El usuario está asociado a tableros o tareas y no puede ser eliminado.");
       }
