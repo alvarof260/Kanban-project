@@ -24,7 +24,8 @@ public class TableroRepository : ITableroRepository
 
   public Tablero CrearTablero(Tablero tablero)
   {
-    string query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) VALUES (@IdUsuarioPropietario, @Nombre, @Descripcion);";
+    string query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) VALUES (@IdUsuarioPropietario, @Nombre, @Descripcion);
+                     SELECT last_insert_rowid();";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -35,7 +36,8 @@ public class TableroRepository : ITableroRepository
       command.Parameters.AddWithValue("@Nombre", tablero.Nombre);
       command.Parameters.AddWithValue("@Descripcion", tablero.Descripcion);
 
-      command.ExecuteNonQuery();
+      int idGenerado = Convert.ToInt32(command.ExecuteScalar());
+      tablero.Id = idGenerado;
 
       connection.Close();
     }
