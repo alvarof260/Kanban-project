@@ -10,6 +10,7 @@ public interface ITareaRepository
   public void ModificarTarea(int id, Tarea tarea);
   public Tarea ObtenerDetalle(int id);
   public List<Tarea> ObtenerTareasPorUsuario(int id);
+  public List<Tarea> ObtenerTareaPorTablero(int id);
 }
 
 public class TareaRepository : ITareaRepository
@@ -100,6 +101,38 @@ public class TareaRepository : ITareaRepository
   {
     List<Tarea> tareas = new List<Tarea>();
     string query = @"SELECT * FROM Tarea WHERE id_usuario_asignado = @Id;";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+      command.Parameters.AddWithValue("@Id", id);
+
+      using (SqliteDataReader reader = command.ExecuteReader())
+      {
+        while (reader.Read())
+        {
+          tareas.Add(new Tarea
+          {
+            Id = reader.GetInt32(0),
+            IdTablero = reader.GetInt32(1),
+            Nombre = reader.GetString(2),
+            Estado = (EstadoTarea)reader.GetInt32(3),
+            Descripcion = reader.GetString(4),
+            Color = reader.GetString(5),
+            IdUsuarioAsignado = reader.GetInt32(6)
+          });
+        }
+      }
+      connection.Close();
+    }
+    return tareas;
+  }
+
+  public List<Tarea> ObtenerTareaPorTablero(int id)
+  {
+    List<Tarea> tareas = new List<Tarea>();
+    string query = @"SELECT * FROM Tarea WHERE id_tablero = @Id;";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
