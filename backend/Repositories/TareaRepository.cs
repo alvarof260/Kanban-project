@@ -6,6 +6,7 @@ namespace Kanban.Repositories;
 public interface ITareaRepository
 {
   public Tarea CrearTarea(int id, Tarea tarea);
+  public void ModificarTarea(int id, Tarea tarea);
 }
 
 public class TareaRepository : ITareaRepository
@@ -43,4 +44,27 @@ public class TareaRepository : ITareaRepository
     return tarea;
   }
 
+  public void ModificarTarea(int id, Tarea tarea)
+  {
+    string query = @"
+      UPDATE Tarea
+      SET nombre = @Nombre, estado = @Estado, descripcion = @Descripcion, color = @Color
+      WHERE id = @Id;
+      ";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      command.Parameters.AddWithValue("@Nombre", tarea.Nombre);
+      command.Parameters.AddWithValue("@Estado", tarea.Estado);
+      command.Parameters.AddWithValue("@Descripcion", tarea.Descripcion);
+      command.Parameters.AddWithValue("@Color", tarea.Color);
+
+      command.ExecuteNonQuery();
+
+      connection.Close();
+    }
+  }
 }
