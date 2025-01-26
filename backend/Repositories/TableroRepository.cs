@@ -1,12 +1,13 @@
 using Microsoft.Data.Sqlite;
 using Kanban.Models;
+using Kanban.DTO;
 
 namespace Kanban.Repositories;
 
 public interface ITableroRepository
 {
   public Tablero CrearTablero(Tablero tablero);
-  public void ModificarTablero(int id, Tablero tablero);
+  public void ModificarTablero(int id, TableroDTO tablero);
   public Tablero ObtenerDetalles(int id);
   public List<Tablero> ObtenerTableros();
   public List<Tablero> ObtenerTablerosId(int id);
@@ -44,18 +45,25 @@ public class TableroRepository : ITableroRepository
     return tablero;
   }
 
-  public void ModificarTablero(int id, Tablero tablero)
+  public void ModificarTablero(int id, TableroDTO tablero)
   {
-    string query = @"UPDATE Tablero SET nombre = @Nombre, descripcion = @Descripcion WHERE id = @Id;";
+    string query = @"
+                   UPDATE Tablero 
+                   SET 
+                      nombre = COALESCE(@Nombre, nombre), 
+                      descripcion = COALESCE(@Descripcion, descripcion) 
+                   WHERE id = @Id;";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
 
       SqliteCommand command = new SqliteCommand(query, connection);
-
-      command.Parameters.AddWithValue("@Nombre", tablero.Nombre);
-      command.Parameters.AddWithValue("@Descripcion", tablero.Descripcion);
       command.Parameters.AddWithValue("@Id", id);
+
+      command.Parameters.AddWithValue("@Nombre",
+          string.IsNullOrEmpty(tablero.Nombre) ? DBNull.Value : tablero.Nombre);
+      command.Parameters.AddWithValue("@Descripcion",
+          string.IsNullOrEmpty(tablero.Descripcion) ? DBNull.Value : tablero.Descripcion);
 
       command.ExecuteNonQuery();
 
