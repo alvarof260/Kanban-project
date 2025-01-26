@@ -11,6 +11,7 @@ public interface ITareaRepository
   public Tarea ObtenerDetalle(int id);
   public List<Tarea> ObtenerTareasPorUsuario(int id);
   public List<Tarea> ObtenerTareaPorTablero(int id);
+  public void EliminarTarea(int id);
 }
 
 public class TareaRepository : ITareaRepository
@@ -159,5 +160,22 @@ public class TareaRepository : ITareaRepository
       connection.Close();
     }
     return tareas;
+  }
+
+  public void EliminarTarea(int id)
+  {
+    string query = @"DELETE FROM Tarea WHERE id = @Id;";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      command.Parameters.AddWithValue("@Id", id);
+
+      command.ExecuteNonQuery();
+
+      connection.Close();
+    }
   }
 }
