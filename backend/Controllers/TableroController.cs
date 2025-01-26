@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Kanban.Models;
 using Kanban.Repositories;
+using Kanban.DTO;
 
 namespace Kanban.Controllers;
 
@@ -43,9 +44,23 @@ public class TableroController : ControllerBase
     catch (Exception ex)
     {
       _logger.LogError(ex.ToString());
+      throw new Exception("Error al crear el tablero");
+    }
+  }
+
+  [HttpPut("{id}")]
+  public IActionResult Modificar(int id, [FromBody] TableroDTO tablero)
+  {
+    try
+    {
+      _tableroRepository.ModificarTablero(id, tablero);
+      return Ok("tablero modificado");
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
       throw new Exception("Error al obtener los tableros");
     }
-
   }
 
 }
