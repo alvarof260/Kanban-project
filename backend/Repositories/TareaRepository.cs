@@ -1,4 +1,5 @@
 using Kanban.Models;
+using Kanban.Enums;
 using Microsoft.Data.Sqlite;
 
 namespace Kanban.Repositories;
@@ -7,6 +8,7 @@ public interface ITareaRepository
 {
   public Tarea CrearTarea(int id, Tarea tarea);
   public void ModificarTarea(int id, Tarea tarea);
+  public Tarea ObtenerDetalle(int id);
 }
 
 public class TareaRepository : ITareaRepository
@@ -66,5 +68,30 @@ public class TareaRepository : ITareaRepository
 
       connection.Close();
     }
+  }
+
+  public Tarea ObtenerDetalle(int id)
+  {
+    Tarea tareaBuscado = new Tarea();
+    string query = @"SELECT * FROM Tarea WHERE id = @Id;";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+      using (SqliteDataReader reader = command.ExecuteReader())
+      {
+        tareaBuscado.Id = reader.GetInt32(0);
+        tareaBuscado.IdTablero = reader.GetInt32(1);
+        tareaBuscado.Nombre = reader.GetString(2);
+        tareaBuscado.Estado = (EstadoTarea)reader.GetInt32(3);
+        tareaBuscado.Descripcion = reader.GetString(4);
+        tareaBuscado.Color = reader.GetString(5);
+        tareaBuscado.IdUsuarioAsignado = reader.GetInt32(6);
+      }
+
+      connection.Close();
+    }
+    return tareaBuscado;
   }
 }
