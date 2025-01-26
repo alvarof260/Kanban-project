@@ -39,6 +39,7 @@ public class TableroRepository : ITableroRepository
 
       connection.Close();
     }
+    return tablero;
   }
 
   public void ModificarTablero(int id, Tablero tablero)
@@ -142,4 +143,41 @@ public class TableroRepository : ITableroRepository
     return tablerosBuscado;
   }
 
+  public void EliminarTablero(int id)
+  {
+    string query = @"DELETE FROM tablero WHERE id = @Id";
+    if (!TieneTarea(id))
+    {
+      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      {
+        connection.Open();
+
+        SqliteCommand command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@Id", id);
+
+        command.ExecuteNonQuery();
+
+        connection.Close();
+      }
+    }
+  }
+
+  private bool TieneTarea(int id)
+  {
+    int contador;
+    string query = @"SELECT COUNT(*) FROM Tablero t LEFT JOIN Tarea ta ON t.id = ta.id_tablero WHERE t.id = @Id;";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      command.Parameters.AddWithValue("@Id", id);
+      contador = Convert.ToInt32(command.ExecuteScalar());
+
+      connection.Close();
+    }
+    return contador > 0;
+  }
 }
