@@ -176,7 +176,7 @@ public class TableroRepository : ITableroRepository
   private bool TieneTarea(int id)
   {
     int contador;
-    string query = @"SELECT COUNT(*) FROM Tablero t LEFT JOIN Tarea ta ON t.id = ta.id_tablero WHERE t.id = @Id;";
+    string query = @"SELECT COUNT(*) FROM Tarea WHERE id_tablero = @Id;";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();

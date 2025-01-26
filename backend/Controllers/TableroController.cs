@@ -59,7 +59,22 @@ public class TableroController : ControllerBase
     catch (Exception ex)
     {
       _logger.LogError(ex.ToString());
-      throw new Exception("Error al obtener los tableros");
+      throw new Exception("Error al modificar el tablero");
+    }
+  }
+
+  [HttpDelete("{id}")]
+  public IActionResult Eliminar(int id)
+  {
+    try
+    {
+      _tableroRepository.EliminarTablero(id);
+      return NoContent();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw new Exception("Error al obtener el tablero");
     }
   }
 
