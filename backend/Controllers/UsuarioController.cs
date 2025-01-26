@@ -62,4 +62,26 @@ public class UsuarioController : ControllerBase
       throw new Exception("Error al modificar al usuario");
     }
   }
+
+  [HttpDelete("/{id}")]
+  public IActionResult Eliminar(int id)
+  {
+    try
+    {
+      _usuarioRepository.EliminarUsuario(id);
+      return NoContent();
+    }
+    catch (InvalidOperationException ex) // Captura de excepciones específicas
+    {
+      // Maneja casos específicos, como cuando el usuario no puede ser eliminado por estar asociado
+      _logger.LogWarning($"No se pudo eliminar al usuario {id}: {ex.Message}");
+      return BadRequest(new { mensaje = ex.Message }); // Retorna BadRequest con mensaje descriptivo
+    }
+    catch (Exception ex)
+    {
+      // Excepción genérica para cualquier otro error
+      _logger.LogError($"Error al eliminar al usuario {id}: {ex.ToString()}");
+      return StatusCode(500, new { mensaje = "Error interno al intentar eliminar al usuario." }); // Retorna un Internal Server Error
+    }
+  }
 }
