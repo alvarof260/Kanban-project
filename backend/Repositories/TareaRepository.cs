@@ -12,6 +12,7 @@ public interface ITareaRepository
   public List<Tarea> ObtenerTareasPorUsuario(int id);
   public List<Tarea> ObtenerTareaPorTablero(int id);
   public void EliminarTarea(int id);
+  public void AsignarTarea(int idUsuario, int idTarea);
 }
 
 public class TareaRepository : ITareaRepository
@@ -172,6 +173,24 @@ public class TareaRepository : ITareaRepository
       SqliteCommand command = new SqliteCommand(query, connection);
 
       command.Parameters.AddWithValue("@Id", id);
+
+      command.ExecuteNonQuery();
+
+      connection.Close();
+    }
+  }
+
+  public void AsignarTarea(int idUsuario, int idTarea)
+  {
+    string query = @"UPDATE Tarea SET id_usuario_asignado = @IdUsuarioAsignado WHERE id = @Id;";
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      command.Parameters.AddWithValue("@IdUsuarioAsignado", idUsuario);
+      command.Parameters.AddWithValue("@Id", idTarea);
 
       command.ExecuteNonQuery();
 
