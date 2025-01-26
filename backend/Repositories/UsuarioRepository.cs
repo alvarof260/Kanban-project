@@ -6,7 +6,7 @@ namespace Kanban.Repositories
 {
   public interface IUsuarioRepository
   {
-    public void CrearUsuario(Usuario usuario);
+    public Usuario CrearUsuario(Usuario usuario);
     public void ModificarUsuario(int Id, Usuario usuario);
     public List<Usuario> ObtenerUsuarios();
     public Usuario ObtenerUsuarioId(int id);
@@ -23,9 +23,10 @@ namespace Kanban.Repositories
       this._connectionString = connectionString;
     }
 
-    public void CrearUsuario(Usuario usuario)
+    public Usuario CrearUsuario(Usuario usuario)
     {
-      string query = @"INSERT INTO Usuario (nombre_de_usuario, password, rol_usuario) VALUES (@NombreDeUsuario, @Password, @RolUsuario);";
+      string query = @"INSERT INTO Usuario (nombre_de_usuario, password, rol_usuario) VALUES (@NombreDeUsuario, @Password, @RolUsuario);
+                       SELECT last_insert_rowid();";
       using (SqliteConnection connection = new SqliteConnection(_connectionString))
       {
         connection.Open();
@@ -36,10 +37,12 @@ namespace Kanban.Repositories
         command.Parameters.AddWithValue("@Password", usuario.Password);
         command.Parameters.AddWithValue("@RolUsuario", usuario.RolUsuario);
 
-        command.ExecuteNonQuery();
+        int idGenerado = Convert.ToInt32(command.ExecuteScalar());
+        usuario.Id = idGenerado;
 
         connection.Close();
       }
+      return usuario;
     }
 
     public void ModificarUsuario(int id, Usuario usuario)
