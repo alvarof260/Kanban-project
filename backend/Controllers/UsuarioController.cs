@@ -14,7 +14,7 @@ public class UsuarioController : ControllerBase
 
   public UsuarioController(ILogger<UsuarioController> logger)
   {
-    _logger = logger;
+    this._logger = logger;
     this._usuarioRepository = new UsuarioRepository(@"Data Source=/mnt/c/Users/alvarof260/Documents/Kanban.db;Cache=Shared");
   }
 
@@ -48,7 +48,7 @@ public class UsuarioController : ControllerBase
     }
   }
 
-  [HttpPut("/{id}")]
+  [HttpPut("{id}")]
   public IActionResult Modificar(int id, [FromBody] UsuarioDTO usuario)
   {
     try
@@ -63,7 +63,7 @@ public class UsuarioController : ControllerBase
     }
   }
 
-  [HttpDelete("/{id}")]
+  [HttpDelete("{id}")]
   public IActionResult Eliminar(int id)
   {
     try
