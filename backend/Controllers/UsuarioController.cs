@@ -32,4 +32,19 @@ public class UsuarioController : ControllerBase
     }
   }
 
+  [HttpPost]
+  public IActionResult Crear(Usuario usuario)
+  {
+    try
+    {
+      Usuario nuevoUsuario = _usuarioRepository.CrearUsuario(usuario);
+      return Created("api/Usuario", nuevoUsuario);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw new Exception("Error al crear al usuario");
+    }
+  }
+
 }
