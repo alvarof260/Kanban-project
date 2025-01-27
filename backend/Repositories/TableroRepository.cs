@@ -74,7 +74,7 @@ public class TableroRepository : ITableroRepository
   public Tablero ObtenerDetalles(int id)
   {
     Tablero tableroBuscado = new Tablero();
-    string query = @"SELECT id_usuario_propietario, nombre, descripcion FROM Tablero WHERE id = @Id";
+    string query = @"SELECT * FROM Tablero WHERE id = @Id";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -100,7 +100,7 @@ public class TableroRepository : ITableroRepository
   public List<Tablero> ObtenerTableros()
   {
     List<Tablero> tableros = new List<Tablero>();
-    string query = @"SELECT id_usuario_propietario, nombre, descripcion FROM Tablero;";
+    string query = @"SELECT * FROM Tablero;";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -113,9 +113,10 @@ public class TableroRepository : ITableroRepository
         {
           tableros.Add(new Tablero
           {
-            IdUsuarioPropietario = reader.GetInt32(0),
-            Nombre = reader.GetString(1),
-            Descripcion = reader.GetString(2)
+            Id = reader.GetInt32(0),
+            IdUsuarioPropietario = reader.GetInt32(1),
+            Nombre = reader.GetString(2),
+            Descripcion = reader.GetString(3)
           });
         }
       }
