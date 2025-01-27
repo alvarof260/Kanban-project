@@ -10,12 +10,12 @@ namespace Kanban.Controllers;
 public class TableroController : ControllerBase
 {
   private readonly ILogger<TableroController> _logger;
-  private TableroRepository _tableroRepository;
+  private ITableroRepository _tableroRepository;
 
-  public TableroController(ILogger<TableroController> logger)
+  public TableroController(ILogger<TableroController> logger, ITableroRepository tableroRepository)
   {
     this._logger = logger;
-    this._tableroRepository = new TableroRepository(@"Data Source=/mnt/c/Users/alvarof260/Documents/Kanban.db;Cache=Shared");
+    this._tableroRepository = tableroRepository;
   }
 
   [HttpGet]

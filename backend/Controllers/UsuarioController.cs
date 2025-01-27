@@ -10,12 +10,12 @@ namespace Kanban.Controllers;
 public class UsuarioController : ControllerBase
 {
   private readonly ILogger<UsuarioController> _logger;
-  private UsuarioRepository _usuarioRepository;
+  private IUsuarioRepository _usuarioRepository;
 
-  public UsuarioController(ILogger<UsuarioController> logger)
+  public UsuarioController(ILogger<UsuarioController> logger, IUsuarioRepository usuarioRepository)
   {
     this._logger = logger;
-    this._usuarioRepository = new UsuarioRepository(@"Data Source=/mnt/c/Users/alvarof260/Documents/Kanban.db;Cache=Shared");
+    this._usuarioRepository = usuarioRepository;
   }
 
   [HttpGet]

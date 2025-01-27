@@ -10,12 +10,12 @@ namespace Kanban.Controllers;
 public class TareaController : ControllerBase
 {
   private readonly ILogger<TareaController> _logger;
-  private TareaRepository _tareaRepository;
+  private ITareaRepository _tareaRepository;
 
-  public TareaController(ILogger<TareaController> logger)
+  public TareaController(ILogger<TareaController> logger, ITareaRepository tareaRepository)
   {
     this._logger = logger;
-    this._tareaRepository = new TareaRepository(@"Data Source=/mnt/c/Users/alvarof260/Documents/Kanban.db;Cache=Shared");
+    this._tareaRepository = tareaRepository;
   }
 
   [HttpGet("tablero/{id}")]
