@@ -1,5 +1,6 @@
 using Kanban.Models;
 using Kanban.Enums;
+using Kanban.DTO;
 using Microsoft.Data.Sqlite;
 
 namespace Kanban.Repositories;
@@ -7,7 +8,7 @@ namespace Kanban.Repositories;
 public interface ITareaRepository
 {
   public Tarea CrearTarea(int id, Tarea tarea);
-  public void ModificarTarea(int id, Tarea tarea);
+  public void ModificarTarea(int id, TareaDTO tarea);
   public Tarea ObtenerDetalle(int id);
   public List<Tarea> ObtenerTareasPorUsuario(int id);
   public List<Tarea> ObtenerTareaPorTablero(int id);
@@ -53,11 +54,15 @@ public class TareaRepository : ITareaRepository
     return tarea;
   }
 
-  public void ModificarTarea(int id, Tarea tarea)
+  public void ModificarTarea(int id, TareaDTO tarea)
   {
     string query = @"
       UPDATE Tarea
-      SET nombre = @Nombre, estado = @Estado, descripcion = @Descripcion, color = @Color
+      SET 
+          nombre = COALESCE(@Nombre, nombre), 
+          estado = COALESCE(@Estado, estado), 
+          descripcion = COALESCE(@Descripcion, descripcion), 
+          color = COALESCE(@Color, color)
       WHERE id = @Id;
       ";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -66,10 +71,15 @@ public class TareaRepository : ITareaRepository
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@Nombre", tarea.Nombre);
-      command.Parameters.AddWithValue("@Estado", tarea.Estado);
-      command.Parameters.AddWithValue("@Descripcion", tarea.Descripcion);
-      command.Parameters.AddWithValue("@Color", tarea.Color);
+      command.Parameters.AddWithValue("@Nombre",
+         string.IsNullOrEmpty(tarea.Nombre) ? DBNull.Value : tarea.Nombre);
+      command.Parameters.AddWithValue("@Estado",
+          tarea.Estado.HasValue ? tarea.Estado : DBNull.Value);
+      command.Parameters.AddWithValue("@Descripcion",
+          string.IsNullOrEmpty(tarea.Descripcion) ? DBNull.Value : tarea.Descripcion);
+      command.Parameters.AddWithValue("@Color",
+          string.IsNullOrEmpty(tarea.Color) ? DBNull.Value : tarea.Color);
+      command.Parameters.AddWithValue("@Id", id);
 
       command.ExecuteNonQuery();
 
