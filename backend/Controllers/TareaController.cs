@@ -19,12 +19,42 @@ public class TareaController : ControllerBase
   }
 
   [HttpGet("tablero/{id}")]
-  public IActionResult Listar(int id)
+  public IActionResult ListarPorTablero(int id)
   {
     try
     {
       List<Tarea> tareas = _tareaRepository.ObtenerTareaPorTablero(id);
       return Ok(tareas);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw;
+    }
+  }
+
+  [HttpGet("usuario/{id}")]
+  public IActionResult ListarPorUsuario(int id)
+  {
+    try
+    {
+      List<Tarea> tareas = _tareaRepository.ObtenerTareasPorUsuario(id);
+      return Ok(tareas);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw;
+    }
+  }
+
+  [HttpPost("crear/{id}")]
+  public IActionResult Crear(int id, Tarea tarea)
+  {
+    try
+    {
+      Tarea nuevaTarea = _tareaRepository.CrearTarea(id, tarea);
+      return Created("api/Tarea/crear/" + id, nuevaTarea);
     }
     catch (Exception ex)
     {
