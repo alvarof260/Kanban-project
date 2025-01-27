@@ -77,4 +77,19 @@ public class TareaController : ControllerBase
       throw;
     }
   }
+
+  [HttpDelete("{id}")]
+  public IActionResult Eliminar(int id)
+  {
+    try
+    {
+      _tareaRepository.EliminarTarea(id);
+      return NoContent();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw;
+    }
+  }
 }
