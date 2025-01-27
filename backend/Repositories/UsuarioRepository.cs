@@ -11,6 +11,7 @@ namespace Kanban.Repositories
     public void ModificarUsuario(int Id, UsuarioDTO usuario);
     public List<Usuario> ObtenerUsuarios();
     public Usuario ObtenerUsuarioId(int id);
+    public Usuario ObtenerUsuarioNombre(string nombre);
     public void EliminarUsuario(int id);
     public void CambiarPassword(int id, Usuario usuario);
   }
@@ -129,6 +130,34 @@ namespace Kanban.Repositories
       }
       return usuarioBuscado;
     }
+
+    public Usuario ObtenerUsuarioNombre(string nombre)
+    {
+      Usuario usuarioBuscado = new Usuario();
+      string query = @"SELECT * FROM Usuario WHERE nombre_de_usuario = @NombreDeUsuario;";
+      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      {
+        connection.Open();
+
+        SqliteCommand command = new SqliteCommand(query, connection);
+
+        command.Parameters.AddWithValue("@NombreDeUsuario", nombre);
+        using (SqliteDataReader reader = command.ExecuteReader())
+        {
+          while (reader.Read())
+          {
+            usuarioBuscado.Id = reader.GetInt32(0);
+            usuarioBuscado.NombreDeUsuario = reader.GetString(1);
+            usuarioBuscado.Password = reader.GetString(2);
+            usuarioBuscado.RolUsuario = (RolUsuario)reader.GetInt32(3);
+          }
+        }
+
+        connection.Close();
+      }
+      return usuarioBuscado;
+    }
+
 
     public void EliminarUsuario(int id)
     {
