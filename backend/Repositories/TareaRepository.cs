@@ -29,21 +29,24 @@ public class TareaRepository : ITareaRepository
     string query = @"
       INSERT INTO Tarea 
       (id_tablero, nombre, estado, descripcion, color, id_usuario_asignado)
-      VALUES (@IdTablero, @Nombre, @Estado, @Descripcion, @Color, @IdUsuarioAsignado);";
+      VALUES (@IdTablero, @Nombre, @Estado, @Descripcion, @Color, @IdUsuarioAsignado);
+      SELECT last_insert_rowid();";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@IdTablero", tarea.IdTablero);
+      command.Parameters.AddWithValue("@IdTablero", id);
       command.Parameters.AddWithValue("@Nombre", tarea.Nombre);
       command.Parameters.AddWithValue("@Estado", tarea.Estado);
       command.Parameters.AddWithValue("@Descripcion", tarea.Descripcion);
       command.Parameters.AddWithValue("@Color", tarea.Color);
       command.Parameters.AddWithValue("@IdUsuarioAsignado", tarea.IdUsuarioAsignado);
 
-      command.ExecuteNonQuery();
+      int idGenerado = Convert.ToInt32(command.ExecuteScalar());
+      tarea.Id = idGenerado;
+      tarea.IdTablero = id;
 
       connection.Close();
     }
