@@ -62,4 +62,19 @@ public class TareaController : ControllerBase
       throw;
     }
   }
+
+  [HttpPut("{id}")]
+  public IActionResult Modificar(int id, TareaDTO tarea)
+  {
+    try
+    {
+      _tareaRepository.ModificarTarea(id, tarea);
+      return Ok("Tarea modificada");
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString());
+      throw;
+    }
+  }
 }
