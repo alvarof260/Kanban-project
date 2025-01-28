@@ -1,7 +1,6 @@
 using Kanban.Models;
 using Kanban.DTO;
 using Kanban.Interfaces;
-using Kanban.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kanban.Controllers;
