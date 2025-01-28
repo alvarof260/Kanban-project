@@ -1,20 +1,10 @@
 using Kanban.Models;
-using Kanban.Enums;
 using Kanban.DTO;
+using Kanban.Enums;
+using Kanban.Interfaces;
 using Microsoft.Data.Sqlite;
 
 namespace Kanban.Repositories;
-
-public interface ITareaRepository
-{
-  public Tarea CrearTarea(int id, Tarea tarea);
-  public void ModificarTarea(int id, TareaDTO tarea);
-  public Tarea ObtenerDetalle(int id);
-  public List<Tarea> ObtenerTareasPorUsuario(int id);
-  public List<Tarea> ObtenerTareaPorTablero(int id);
-  public void EliminarTarea(int id);
-  public void AsignarTarea(int idUsuario, int idTarea);
-}
 
 public class TareaRepository : ITareaRepository
 {

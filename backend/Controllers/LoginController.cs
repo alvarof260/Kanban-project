@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Kanban.Repositories;
-using Kanban.ViewModels;
 using Kanban.Models;
+using Kanban.ViewModels;
+using Kanban.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kanban.Controllers;
 

@@ -1,4 +1,5 @@
 using Kanban.Repositories;
+using Kanban.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
