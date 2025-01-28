@@ -1,5 +1,4 @@
 using Kanban.Models;
-using Kanban.DTO;
 using Kanban.ViewModels;
 using Kanban.Enums;
 using Kanban.Interfaces;
@@ -74,16 +73,24 @@ public class UsuarioRepository : IUsuarioRepository
       command.Parameters.AddWithValue("@RolUsuario",
           usuario.RolUsuario.HasValue ? usuario.RolUsuario : DBNull.Value);
 
-      command.ExecuteNonQuery();
+      int usuarioUpdated = command.ExecuteNonQuery();
+
+      if (usuarioUpdated == 0)
+      {
+        throw new Exception($"No se encontro el usuario con ID: {id}.");
+      }
 
       connection.Close();
     }
   }
 
-  public List<Usuario> ObtenerUsuarios()
+  public List<GetUsuariosViewModel> GetUsuarios()
   {
-    List<Usuario> usuarios = new List<Usuario>();
-    string query = @"SELECT id, nombre_de_usuario, rol_usuario FROM Usuario;";
+    List<GetUsuariosViewModel> usuarios = new List<GetUsuariosViewModel>();
+
+    string query = @"SELECT nombre_de_usuario, rol_usuario 
+                     FROM Usuario;";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -94,11 +101,10 @@ public class UsuarioRepository : IUsuarioRepository
       {
         while (reader.Read())
         {
-          usuarios.Add(new Usuario
+          usuarios.Add(new GetUsuariosViewModel
           {
-            Id = reader.GetInt32(0),
-            NombreDeUsuario = reader.GetString(1),
-            RolUsuario = (RolUsuario)reader.GetInt32(2)
+            Usuario = reader.GetString(0),
+            RolUsuario = (RolUsuario)reader.GetInt32(1)
           });
         }
       }
@@ -108,10 +114,14 @@ public class UsuarioRepository : IUsuarioRepository
     return usuarios;
   }
 
-  public Usuario ObtenerUsuarioId(int id)
+  public Usuario GetUsuarioId(int id)
   {
-    Usuario usuarioBuscado = new Usuario();
-    string query = @"SELECT nombre_de_usuario, password, rol_usuario FROM Usuario WHERE id = @Id;";
+    Usuario usuarioBuscado = null;
+
+    string query = @"SELECT * 
+                     FROM Usuario 
+                     WHERE id = @Id;";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -121,19 +131,30 @@ public class UsuarioRepository : IUsuarioRepository
       command.Parameters.AddWithValue("@Id", id);
       using (SqliteDataReader reader = command.ExecuteReader())
       {
-        while (reader.Read())
+        if (reader.Read())
         {
-          usuarioBuscado.Id = reader.GetInt32(0);
-          usuarioBuscado.NombreDeUsuario = reader.GetString(1);
-          usuarioBuscado.RolUsuario = (RolUsuario)reader.GetInt32(2);
+          usuarioBuscado = new Usuario
+          {
+            Id = reader.GetInt32(0),
+            NombreDeUsuario = reader.GetString(1),
+            Password = reader.GetString(2),
+            RolUsuario = (RolUsuario)reader.GetInt32(3)
+          };
         }
       }
 
       connection.Close();
     }
+
+    if (usuarioBuscado == null)
+    {
+      throw new Exception($"No se encontro el usuario con ID: {id}.");
+    }
+
     return usuarioBuscado;
   }
 
+  // TODO: debo cambiar nombre, ver logica y lanzar errores
   public Usuario ObtenerUsuarioNombre(string nombre)
   {
     Usuario usuarioBuscado = new Usuario();
@@ -158,11 +179,12 @@ public class UsuarioRepository : IUsuarioRepository
 
       connection.Close();
     }
+
     return usuarioBuscado;
   }
 
 
-  public void EliminarUsuario(int id)
+  public void DeleteUsuario(int id)
   {
     if (!Verificar(id))
     {
@@ -177,15 +199,24 @@ public class UsuarioRepository : IUsuarioRepository
       SqliteCommand command = new SqliteCommand(query, connection);
 
       command.Parameters.AddWithValue("@Id", id);
-      command.ExecuteNonQuery();
+
+      int filasAfectadas = command.ExecuteNonQuery();
+
+      if (filasAfectadas == 0)
+      {
+        throw new Exception($"No se encontro el usuario con ID: {id}.");
+      }
 
       connection.Close();
     }
   }
 
-  public void CambiarPassword(int id, Usuario usuario)
+  public void ChangePassword(int id, Usuario usuario)
   {
-    string query = @"UPDATE Usuario SET password = @Password WHERE id = @Id;";
+    string query = @"UPDATE Usuario 
+                     SET password = @Password 
+                     WHERE id = @Id;";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -195,7 +226,12 @@ public class UsuarioRepository : IUsuarioRepository
       command.Parameters.AddWithValue("@Id", id);
       command.Parameters.AddWithValue("@Password", usuario.Password);
 
-      command.ExecuteNonQuery();
+      int usuarioUpdated = command.ExecuteNonQuery();
+
+      if (usuarioUpdated == 0)
+      {
+        throw new Exception("No se encontro el usuario con id: {id}");
+      }
 
       connection.Close();
     }
@@ -204,12 +240,13 @@ public class UsuarioRepository : IUsuarioRepository
   private bool Verificar(int id)
   {
     int contador;
-    string query = @"
-        SELECT COUNT(*)
-        FROM Usuario u
-        LEFT JOIN Tablero t ON u.id = id_usuario_propietario
-        LEFT JOIN Tarea ta ON u.id = ta.id_usuario_asignado
-        WHERE u.id = @Id;";
+
+    string query = @"SELECT COUNT(*)
+                     FROM Usuario u
+                     LEFT JOIN Tablero t ON u.id = id_usuario_propietario
+                     LEFT JOIN Tarea ta ON u.id = ta.id_usuario_asignado
+                     WHERE u.id = @Id AND (t.id IS NOT NULL OR ta.id IS NOT NULL);";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -222,6 +259,7 @@ public class UsuarioRepository : IUsuarioRepository
 
       connection.Close();
     }
-    return contador > 0;
+
+    return contador == 0; // El usuario no tiene tareas o tableros
   }
 }

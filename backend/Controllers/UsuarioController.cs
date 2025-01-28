@@ -1,5 +1,4 @@
 using Kanban.Models;
-using Kanban.DTO;
 using Kanban.ViewModels;
 using Kanban.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +23,7 @@ public class UsuarioController : ControllerBase
   {
     try
     {
-      List<Usuario> usuarios = _usuarioRepository.ObtenerUsuarios();
+      List<GetUsuariosViewModel> usuarios = _usuarioRepository.GetUsuarios();
       return Ok(usuarios);
     }
     catch (Exception ex)
@@ -69,7 +68,7 @@ public class UsuarioController : ControllerBase
   {
     try
     {
-      _usuarioRepository.EliminarUsuario(id);
+      _usuarioRepository.DeleteUsuario(id);
       return NoContent();
     }
     catch (InvalidOperationException ex) // Captura de excepciones específicas
