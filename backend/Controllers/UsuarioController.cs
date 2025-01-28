@@ -1,5 +1,6 @@
 using Kanban.Models;
 using Kanban.DTO;
+using Kanban.ViewModels;
 using Kanban.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,11 +35,11 @@ public class UsuarioController : ControllerBase
   }
 
   [HttpPost]
-  public IActionResult Crear(Usuario usuario)
+  public IActionResult Crear(CreateUsuarioViewModel usuario)
   {
     try
     {
-      Usuario nuevoUsuario = _usuarioRepository.CrearUsuario(usuario);
+      Usuario nuevoUsuario = _usuarioRepository.CreateUsuario(usuario);
       return Created("api/Usuario", nuevoUsuario);
     }
     catch (Exception ex)
@@ -49,11 +50,11 @@ public class UsuarioController : ControllerBase
   }
 
   [HttpPut("{id}")]
-  public IActionResult Modificar(int id, [FromBody] UsuarioDTO usuario)
+  public IActionResult Modificar(int id, [FromBody] UpdateUsuarioViewModel usuario)
   {
     try
     {
-      _usuarioRepository.ModificarUsuario(id, usuario);
+      _usuarioRepository.UpdateUsuario(id, usuario);
       return Ok("Usuario modificado");
     }
     catch (Exception ex)

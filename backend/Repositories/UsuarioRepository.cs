@@ -1,5 +1,6 @@
 using Kanban.Models;
 using Kanban.DTO;
+using Kanban.ViewModels;
 using Kanban.Enums;
 using Kanban.Interfaces;
 using Microsoft.Data.Sqlite;
@@ -15,37 +16,49 @@ public class UsuarioRepository : IUsuarioRepository
     this._connectionString = connectionString;
   }
 
-  public Usuario CrearUsuario(Usuario usuario)
+  public Usuario CreateUsuario(CreateUsuarioViewModel usuario)
   {
-    string query = @"INSERT INTO Usuario (nombre_de_usuario, password, rol_usuario) VALUES (@NombreDeUsuario, @Password, @RolUsuario);
-                       SELECT last_insert_rowid();";
+    Usuario nuevoUsuario = null;
+
+    string query = @"INSERT INTO Usuario 
+                     (nombre_de_usuario, password, rol_usuario) 
+                     VALUES (@NombreDeUsuario, @Password, @RolUsuario);
+                     SELECT last_insert_rowid();"; // obtener el id del ultimo usuario creado
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@NombreDeUsuario", usuario.NombreDeUsuario);
+      command.Parameters.AddWithValue("@NombreDeUsuario", usuario.Usuario);
       command.Parameters.AddWithValue("@Password", usuario.Password);
       command.Parameters.AddWithValue("@RolUsuario", usuario.RolUsuario);
 
       int idGenerado = Convert.ToInt32(command.ExecuteScalar());
-      usuario.Id = idGenerado;
+
+      nuevoUsuario = new Usuario
+      {
+        Id = idGenerado,
+        NombreDeUsuario = usuario.Usuario,
+        Password = usuario.Password,
+        RolUsuario = usuario.RolUsuario
+      };
 
       connection.Close();
     }
-    return usuario;
+
+    return nuevoUsuario;
   }
 
-  public void ModificarUsuario(int id, UsuarioDTO usuario)
+  public void UpdateUsuario(int id, UpdateUsuarioViewModel usuario)
   {
-    string query = @"
-        UPDATE Usuario 
-        SET 
-            nombre_de_usuario = COALESCE(@NombreDeUsuario, nombre_de_usuario),
-            password = COALESCE(@Password, password),
-            rol_usuario = COALESCE(@RolUsuario, rol_usuario)
-        WHERE id = @Id;";
+    string query = @"UPDATE Usuario 
+                     SET 
+                     nombre_de_usuario = COALESCE(@NombreDeUsuario, nombre_de_usuario),
+                     password = COALESCE(@Password, password),
+                     rol_usuario = COALESCE(@RolUsuario, rol_usuario)
+                     WHERE id = @Id;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
@@ -54,15 +67,15 @@ public class UsuarioRepository : IUsuarioRepository
       SqliteCommand command = new SqliteCommand(query, connection);
       command.Parameters.AddWithValue("@Id", id);
 
-      // Asigna valores solo si están presentes en el DTO
       command.Parameters.AddWithValue("@NombreDeUsuario",
-          string.IsNullOrEmpty(usuario.NombreDeUsuario) ? DBNull.Value : usuario.NombreDeUsuario);
+          string.IsNullOrEmpty(usuario.Usuario) ? DBNull.Value : usuario.Usuario);
       command.Parameters.AddWithValue("@Password",
           string.IsNullOrEmpty(usuario.Password) ? DBNull.Value : usuario.Password);
       command.Parameters.AddWithValue("@RolUsuario",
           usuario.RolUsuario.HasValue ? usuario.RolUsuario : DBNull.Value);
 
       command.ExecuteNonQuery();
+
       connection.Close();
     }
   }
