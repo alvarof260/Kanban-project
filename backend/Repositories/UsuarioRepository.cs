@@ -41,7 +41,7 @@ public class UsuarioRepository : IUsuarioRepository
         Id = idGenerado,
         NombreDeUsuario = usuario.Usuario,
         Password = usuario.Password,
-        RolUsuario = usuario.RolUsuario
+        RolUsuario = (RolUsuario)usuario.RolUsuario
       };
 
       connection.Close();

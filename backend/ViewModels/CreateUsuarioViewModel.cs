@@ -11,7 +11,6 @@ public class CreateUsuarioViewModel
   [Required]
   [StringLength(100, ErrorMessage = "La contraseña no debe superar los 100 caracteres")]
   public string Password { get; set; }
-  [Required]
   [Range(1, 2, ErrorMessage = "El rol de usuario debe ser 1(Administrador) o 2 (Operador)")]
-  public RolUsuario RolUsuario { get; set; }
+  public RolUsuario? RolUsuario { get; set; }
 }

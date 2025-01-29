@@ -10,7 +10,7 @@ namespace Kanban.Models
     private string _descripcion;
     private string _color;
     private EstadoTarea _estado;
-    private int _idUsuarioAsignado;
+    private int? _idUsuarioAsignado;
 
     public int Id { get => _id; set => _id = value; }
     public int IdTablero { get => _idTablero; set => _idTablero = value; }
@@ -18,7 +18,7 @@ namespace Kanban.Models
     public string Descripcion { get => _descripcion; set => _descripcion = value; }
     public string Color { get => _color; set => _color = value; }
     public EstadoTarea Estado { get => _estado; set => _estado = value; }
-    public int IdUsuarioAsignado { get => _idUsuarioAsignado; set => _idUsuarioAsignado = value; }
+    public int? IdUsuarioAsignado { get => _idUsuarioAsignado; set => _idUsuarioAsignado = value; }
 
     public Tarea(int id, int idTablero, string nombre, string descripcion, string color, EstadoTarea estado, int idUsuarioAsignado)
     {

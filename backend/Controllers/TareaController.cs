@@ -1,5 +1,5 @@
 using Kanban.Models;
-using Kanban.DTO;
+using Kanban.ViewModels;
 using Kanban.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +23,7 @@ public class TareaController : ControllerBase
   {
     try
     {
-      List<Tarea> tareas = _tareaRepository.ObtenerTareaPorTablero(id);
+      List<GetTareasViewModel> tareas = _tareaRepository.GetTareaByIdTablero(id);
       return Ok(tareas);
     }
     catch (Exception ex)
@@ -38,7 +38,7 @@ public class TareaController : ControllerBase
   {
     try
     {
-      List<Tarea> tareas = _tareaRepository.ObtenerTareasPorUsuario(id);
+      List<GetTareasViewModel> tareas = _tareaRepository.GetTareaByIdUsuario(id);
       return Ok(tareas);
     }
     catch (Exception ex)
@@ -49,11 +49,11 @@ public class TareaController : ControllerBase
   }
 
   [HttpPost("crear/{id}")]
-  public IActionResult Crear(int id, Tarea tarea)
+  public IActionResult Crear(int id, CreateTareaViewModel tarea)
   {
     try
     {
-      Tarea nuevaTarea = _tareaRepository.CrearTarea(id, tarea);
+      Tarea nuevaTarea = _tareaRepository.CreateTarea(id, tarea);
       return Created("api/Tarea/crear/" + id, nuevaTarea);
     }
     catch (Exception ex)
@@ -64,11 +64,11 @@ public class TareaController : ControllerBase
   }
 
   [HttpPut("{id}")]
-  public IActionResult Modificar(int id, TareaDTO tarea)
+  public IActionResult Modificar(int id, UpdateTareaViewModel tarea)
   {
     try
     {
-      _tareaRepository.ModificarTarea(id, tarea);
+      _tareaRepository.UpdateTarea(id, tarea);
       return Ok("Tarea modificada");
     }
     catch (Exception ex)
@@ -83,7 +83,7 @@ public class TareaController : ControllerBase
   {
     try
     {
-      _tareaRepository.EliminarTarea(id);
+      _tareaRepository.DeleteTarea(id);
       return NoContent();
     }
     catch (Exception ex)
