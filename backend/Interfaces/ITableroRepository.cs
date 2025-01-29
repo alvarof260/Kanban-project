@@ -1,14 +1,14 @@
 using Kanban.Models;
-using Kanban.DTO;
+using Kanban.ViewModels;
 
 namespace Kanban.Interfaces;
 
 public interface ITableroRepository
 {
-  public Tablero CrearTablero(Tablero tablero);
-  public void ModificarTablero(int id, TableroDTO tablero);
-  public Tablero ObtenerDetalles(int id);
-  public List<Tablero> ObtenerTableros();
-  public List<Tablero> ObtenerTablerosId(int id);
-  public void EliminarTablero(int id);
+  public Tablero CreateTablero(CreateTableroViewModel tablero);
+  public void UpdateTablero(int id, UpdateTableroViewModel tablero);
+  public Tablero GetTableroId(int id);
+  public List<GetTablerosViewModel> GetTableros();
+  public List<GetTablerosViewModel> GetTablerosIdUsuario(int idUsuario);
+  public void DeleteTablero(int id);
 }

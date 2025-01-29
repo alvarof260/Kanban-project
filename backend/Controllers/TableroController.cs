@@ -1,5 +1,5 @@
 using Kanban.Models;
-using Kanban.DTO;
+using Kanban.ViewModels;
 using Kanban.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +23,7 @@ public class TableroController : ControllerBase
   {
     try
     {
-      List<Tablero> tableros = _tableroRepository.ObtenerTableros();
+      List<GetTablerosViewModel> tableros = _tableroRepository.GetTableros();
       return Ok(tableros);
     }
     catch (Exception ex)
@@ -34,11 +34,11 @@ public class TableroController : ControllerBase
   }
 
   [HttpPost]
-  public IActionResult Crear(Tablero tablero)
+  public IActionResult Crear(CreateTableroViewModel tablero)
   {
     try
     {
-      Tablero nuevoTablero = _tableroRepository.CrearTablero(tablero);
+      Tablero nuevoTablero = _tableroRepository.CreateTablero(tablero);
       return Created("api/Tablero", nuevoTablero);
     }
     catch (Exception ex)
@@ -49,11 +49,11 @@ public class TableroController : ControllerBase
   }
 
   [HttpPut("{id}")]
-  public IActionResult Modificar(int id, [FromBody] TableroDTO tablero)
+  public IActionResult Modificar(int id, [FromBody] UpdateTableroViewModel tablero)
   {
     try
     {
-      _tableroRepository.ModificarTablero(id, tablero);
+      _tableroRepository.UpdateTablero(id, tablero);
       return Ok("tablero modificado");
     }
     catch (Exception ex)
@@ -68,7 +68,7 @@ public class TableroController : ControllerBase
   {
     try
     {
-      _tableroRepository.EliminarTablero(id);
+      _tableroRepository.DeleteTablero(id);
       return NoContent();
     }
     catch (Exception ex)
@@ -77,5 +77,4 @@ public class TableroController : ControllerBase
       throw new Exception("Error al obtener el tablero");
     }
   }
-
 }

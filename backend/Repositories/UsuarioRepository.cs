@@ -77,7 +77,7 @@ public class UsuarioRepository : IUsuarioRepository
 
       if (usuarioUpdated == 0)
       {
-        throw new Exception($"No se encontro el usuario con ID: {id}.");
+        throw new KeyNotFoundException($"No se encontro el usuario con ID: {id}.");
       }
 
       connection.Close();
@@ -148,7 +148,7 @@ public class UsuarioRepository : IUsuarioRepository
 
     if (usuarioBuscado == null)
     {
-      throw new Exception($"No se encontro el usuario con ID: {id}.");
+      throw new KeyNotFoundException($"No se encontro el usuario con ID: {id}.");
     }
 
     return usuarioBuscado;
@@ -204,7 +204,7 @@ public class UsuarioRepository : IUsuarioRepository
 
       if (filasAfectadas == 0)
       {
-        throw new Exception($"No se encontro el usuario con ID: {id}.");
+        throw new KeyNotFoundException($"No se encontro el usuario con ID: {id}.");
       }
 
       connection.Close();
@@ -230,7 +230,7 @@ public class UsuarioRepository : IUsuarioRepository
 
       if (usuarioUpdated == 0)
       {
-        throw new Exception("No se encontro el usuario con id: {id}");
+        throw new KeyNotFoundException("No se encontro el usuario con id: {id}");
       }
 
       connection.Close();

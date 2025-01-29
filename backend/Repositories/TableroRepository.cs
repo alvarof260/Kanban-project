@@ -1,5 +1,5 @@
 using Kanban.Models;
-using Kanban.DTO;
+using Kanban.ViewModels;
 using Kanban.Interfaces;
 using Microsoft.Data.Sqlite;
 
@@ -14,10 +14,14 @@ public class TableroRepository : ITableroRepository
     this._connectionString = connectionString;
   }
 
-  public Tablero CrearTablero(Tablero tablero)
+  public Tablero CreateTablero(CreateTableroViewModel tablero)
   {
-    string query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) VALUES (@IdUsuarioPropietario, @Nombre, @Descripcion);
+    Tablero nuevoTablero = null;
+
+    string query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) 
+                     VALUES (@IdUsuarioPropietario, @Nombre, @Descripcion);
                      SELECT last_insert_rowid();";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -29,69 +33,60 @@ public class TableroRepository : ITableroRepository
       command.Parameters.AddWithValue("@Descripcion", tablero.Descripcion);
 
       int idGenerado = Convert.ToInt32(command.ExecuteScalar());
-      tablero.Id = idGenerado;
+
+      nuevoTablero = new Tablero
+      {
+        Id = idGenerado,
+        IdUsuarioPropietario = tablero.IdUsuarioPropietario,
+        Nombre = tablero.Nombre,
+        Descripcion = tablero.Descripcion
+      };
 
       connection.Close();
     }
-    return tablero;
+
+    return nuevoTablero;
   }
 
-  public void ModificarTablero(int id, TableroDTO tablero)
+  public void UpdateTablero(int id, UpdateTableroViewModel tablero)
   {
-    string query = @"
-                   UPDATE Tablero 
-                   SET 
-                      nombre = COALESCE(@Nombre, nombre), 
-                      descripcion = COALESCE(@Descripcion, descripcion) 
-                   WHERE id = @Id;";
+    string query = @"UPDATE Tablero 
+                     SET 
+                     nombre = COALESCE(@Nombre, nombre), 
+                     descripcion = COALESCE(@Descripcion, descripcion) 
+                     WHERE id = @Id;";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
 
       SqliteCommand command = new SqliteCommand(query, connection);
-      command.Parameters.AddWithValue("@Id", id);
 
+      command.Parameters.AddWithValue("@Id", id);
       command.Parameters.AddWithValue("@Nombre",
           string.IsNullOrEmpty(tablero.Nombre) ? DBNull.Value : tablero.Nombre);
       command.Parameters.AddWithValue("@Descripcion",
           string.IsNullOrEmpty(tablero.Descripcion) ? DBNull.Value : tablero.Descripcion);
 
-      command.ExecuteNonQuery();
+      int tableroUpdate = command.ExecuteNonQuery();
 
-      connection.Close();
-    }
-  }
-
-  public Tablero ObtenerDetalles(int id)
-  {
-    Tablero tableroBuscado = new Tablero();
-    string query = @"SELECT * FROM Tablero WHERE id = @Id";
-    using (SqliteConnection connection = new SqliteConnection(_connectionString))
-    {
-      connection.Open();
-
-      SqliteCommand command = new SqliteCommand(query, connection);
-
-      using (SqliteDataReader reader = command.ExecuteReader())
+      if (tableroUpdate == 0)
       {
-        while (reader.Read())
-        {
-          tableroBuscado.Id = reader.GetInt32(0);
-          tableroBuscado.IdUsuarioPropietario = reader.GetInt32(1);
-          tableroBuscado.Nombre = reader.GetString(2);
-          tableroBuscado.Descripcion = reader.GetString(3);
-        }
+        throw new KeyNotFoundException($"No se encontro el tablero con ID: {id}.");
       }
 
       connection.Close();
     }
-    return tableroBuscado;
   }
 
-  public List<Tablero> ObtenerTableros()
+  public Tablero GetTableroId(int id)
   {
-    List<Tablero> tableros = new List<Tablero>();
-    string query = @"SELECT * FROM Tablero;";
+    Tablero tableroBuscado = null;
+
+    string query = @"SELECT * 
+                     FROM Tablero 
+                     WHERE id = @Id";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -100,27 +95,36 @@ public class TableroRepository : ITableroRepository
 
       using (SqliteDataReader reader = command.ExecuteReader())
       {
-        while (reader.Read())
+        if (reader.Read())
         {
-          tableros.Add(new Tablero
+          tableroBuscado = new Tablero
           {
             Id = reader.GetInt32(0),
             IdUsuarioPropietario = reader.GetInt32(1),
             Nombre = reader.GetString(2),
             Descripcion = reader.GetString(3)
-          });
+          };
         }
       }
 
       connection.Close();
     }
-    return tableros;
+
+    if (tableroBuscado == null)
+    {
+      throw new KeyNotFoundException($"No se encontro el tablero con ID: {id}.");
+    }
+
+    return tableroBuscado;
   }
 
-  public List<Tablero> ObtenerTablerosId(int id)
+  public List<GetTablerosViewModel> GetTableros()
   {
-    List<Tablero> tablerosBuscado = new List<Tablero>();
-    string query = @"";
+    List<GetTablerosViewModel> tableros = new List<GetTablerosViewModel>();
+
+    string query = @"SELECT id_usuario_propietario, nombre, descripcion 
+                     FROM Tablero;";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -131,7 +135,7 @@ public class TableroRepository : ITableroRepository
       {
         while (reader.Read())
         {
-          tablerosBuscado.Add(new Tablero
+          tableros.Add(new GetTablerosViewModel
           {
             IdUsuarioPropietario = reader.GetInt32(0),
             Nombre = reader.GetString(1),
@@ -142,26 +146,71 @@ public class TableroRepository : ITableroRepository
 
       connection.Close();
     }
+
+    return tableros;
+  }
+
+  public List<GetTablerosViewModel> GetTablerosIdUsuario(int idUsuario)
+  {
+    List<GetTablerosViewModel> tablerosBuscado = new List<GetTablerosViewModel>();
+
+    string query = @"SELECT id_usuario_propietario, nombre, descripcion
+                     FROM Tablero
+                     WHERE id_usuario_propietario = @Id;";
+
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      command.Parameters.AddWithValue("@Id", idUsuario);
+
+      using (SqliteDataReader reader = command.ExecuteReader())
+      {
+        while (reader.Read())
+        {
+          tablerosBuscado.Add(new GetTablerosViewModel
+          {
+            IdUsuarioPropietario = reader.GetInt32(0),
+            Nombre = reader.GetString(1),
+            Descripcion = reader.GetString(2)
+          });
+        }
+      }
+
+      connection.Close();
+    }
+
     return tablerosBuscado;
   }
 
-  public void EliminarTablero(int id)
+  public void DeleteTablero(int id)
   {
-    string query = @"DELETE FROM tablero WHERE id = @Id";
-    if (!TieneTarea(id))
+    if (TieneTarea(id))
     {
-      using (SqliteConnection connection = new SqliteConnection(_connectionString))
+      throw new Exception("No se puede eliminar el tablero porque tiene tareas asignadas.");
+    }
+
+    string query = @"DELETE FROM tablero
+                     WHERE id = @Id";
+
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      SqliteCommand command = new SqliteCommand(query, connection);
+
+      command.Parameters.AddWithValue("@Id", id);
+
+      int filasAfectadas = command.ExecuteNonQuery();
+
+      if (filasAfectadas == 0)
       {
-        connection.Open();
-
-        SqliteCommand command = new SqliteCommand(query, connection);
-
-        command.Parameters.AddWithValue("@Id", id);
-
-        command.ExecuteNonQuery();
-
-        connection.Close();
+        throw new KeyNotFoundException($"No se encontro el tablero con ID: {id}.");
       }
+
+      connection.Close();
     }
   }
 
