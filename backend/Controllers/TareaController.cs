@@ -19,62 +19,99 @@ public class TareaController : ControllerBase
   }
 
   [HttpGet("tablero/{id}")]
-  public IActionResult ListarPorTablero(int id)
+  public IActionResult GetTareaByIdTablero(int id)
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
       List<GetTareasViewModel> tareas = _tareaRepository.GetTareaByIdTablero(id);
-      return Ok(tareas);
+
+      return Ok(new { success = true, data = tareas });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw;
+      _logger.LogError(ex.ToString(), "Error al obtener tareas por tablero.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 
   [HttpGet("usuario/{id}")]
-  public IActionResult ListarPorUsuario(int id)
+  public IActionResult GetTareaByIdUsuario(int id)
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
       List<GetTareasViewModel> tareas = _tareaRepository.GetTareaByIdUsuario(id);
-      return Ok(tareas);
+
+      return Ok(new { success = true, data = tareas });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw;
+      _logger.LogError(ex.ToString(), "Error al obtener tareas por usuario.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 
-  [HttpPost("crear/{id}")]
-  public IActionResult Crear(int id, CreateTareaViewModel tarea)
+  [HttpPost("{id}")]
+  public IActionResult CreateTarea(int id, CreateTareaViewModel tarea)
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+      if (!ModelState.IsValid)
+        return BadRequest(new
+        {
+          success = false,
+          message = "Los datos enviados no son válidos.",
+          errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+        });
+
       Tarea nuevaTarea = _tareaRepository.CreateTarea(id, tarea);
-      return Created("api/Tarea/crear/" + id, nuevaTarea);
+
+      return Created("api/Usuario", new { success = true, data = nuevaTarea });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw;
+      _logger.LogError(ex.ToString(), "Error al crear tarea.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 
   [HttpPut("{id}")]
-  public IActionResult Modificar(int id, UpdateTareaViewModel tarea)
+  public IActionResult UpdateTarea(int id, UpdateTareaViewModel tarea)
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+      if (!ModelState.IsValid)
+        return BadRequest(new
+        {
+          success = false,
+          message = "Los datos enviados no son válidos.",
+          errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+        });
+
       _tareaRepository.UpdateTarea(id, tarea);
-      return Ok("Tarea modificada");
+
+      return Ok(new { success = true, message = "Tarea modificada con éxito." });
+    }
+    catch (KeyNotFoundException ex)
+    {
+      _logger.LogWarning(ex.ToString(), "Al actualizar tarea.");
+      return BadRequest(new { success = false, message = ex });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw;
+      _logger.LogError(ex.ToString(), "Error al actualizar tarea.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 
@@ -83,13 +120,22 @@ public class TareaController : ControllerBase
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
       _tareaRepository.DeleteTarea(id);
+
       return NoContent();
+    }
+    catch (KeyNotFoundException ex)
+    {
+      _logger.LogWarning(ex.ToString(), "Al eliminar usuario.");
+      return BadRequest(new { success = false, message = ex });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw;
+      _logger.LogError(ex.ToString(), "Error al eliminar tarea.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 }

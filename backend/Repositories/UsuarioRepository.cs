@@ -155,10 +155,14 @@ public class UsuarioRepository : IUsuarioRepository
   }
 
   // TODO: debo cambiar nombre, ver logica y lanzar errores
-  public Usuario ObtenerUsuarioNombre(string nombre)
+  public Usuario GetUsuarioNombre(string nombre)
   {
-    Usuario usuarioBuscado = new Usuario();
-    string query = @"SELECT * FROM Usuario WHERE nombre_de_usuario = @NombreDeUsuario;";
+    Usuario usuarioBuscado = null;
+
+    string query = @"SELECT * FROM 
+                     Usuario 
+                     WHERE nombre_de_usuario = @NombreDeUsuario;";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -168,16 +172,24 @@ public class UsuarioRepository : IUsuarioRepository
       command.Parameters.AddWithValue("@NombreDeUsuario", nombre);
       using (SqliteDataReader reader = command.ExecuteReader())
       {
-        while (reader.Read())
+        if (reader.Read())
         {
-          usuarioBuscado.Id = reader.GetInt32(0);
-          usuarioBuscado.NombreDeUsuario = reader.GetString(1);
-          usuarioBuscado.Password = reader.GetString(2);
-          usuarioBuscado.RolUsuario = (RolUsuario)reader.GetInt32(3);
+          usuarioBuscado = new Usuario
+          {
+            Id = reader.GetInt32(0),
+            NombreDeUsuario = reader.GetString(1),
+            Password = reader.GetString(2),
+            RolUsuario = (RolUsuario)reader.GetInt32(3)
+          };
         }
       }
 
       connection.Close();
+    }
+
+    if (usuarioBuscado == null)
+    {
+      throw new KeyNotFoundException($"No se encontro el usuario con nombre: {nombre}.");
     }
 
     return usuarioBuscado;
@@ -191,7 +203,8 @@ public class UsuarioRepository : IUsuarioRepository
       throw new InvalidOperationException("El usuario está asociado a tableros o tareas y no puede ser eliminado.");
     }
 
-    string query = @"DELETE FROM Usuario WHERE id = @Id;";
+    string query = @"DELETE FROM Usuario 
+                     WHERE id = @Id;";
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();

@@ -23,25 +23,31 @@ public class LoginController : ControllerBase
   public IActionResult Login([FromBody] LoginViewModel model)
   {
     if (!ModelState.IsValid)
-    {
-      return BadRequest(ModelState);
-    }
+      return BadRequest(new
+      {
+        success = false,
+        message = "Los datos enviados no son válidos.",
+        errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+      });
 
     if (string.IsNullOrEmpty(model.NombreDeUsuario) && string.IsNullOrEmpty(model.Password))
     {
-      return BadRequest(new { status = "error", mensaje = "Por favor debe ingresar su usuario y contraseña" });
+      return BadRequest(new { success = false, message = "Por favor debe ingresar su usuario y contraseña." });
     }
 
-    Usuario usuario = _usuarioRepository.ObtenerUsuarioNombre(model.NombreDeUsuario);
+    Usuario usuario = _usuarioRepository.GetUsuarioNombre(model.NombreDeUsuario);
 
     if (usuario == null || usuario.Password != model.Password)
     {
-      return Unauthorized(new { mensaje = "Usuario o contraseña incorrectos" });
+      _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + "introdujo mal los datos.");
+      return Unauthorized(new { success = false, mensaje = "Usuario o contraseña incorrectos." });
     }
+
+    HttpContext.Session.SetInt32("id", usuario.Id);
     HttpContext.Session.SetString("nombre", usuario.NombreDeUsuario);
-    HttpContext.Session.SetString("rol", Convert.ToString(usuario.RolUsuario));
-    _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + " ingreso correctamente");
-    return Ok(new { mensaje = "Autenticacion exitosa", usuario });
+    HttpContext.Session.SetInt32("rol", Convert.ToInt32(usuario.RolUsuario));
+    _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + " ingreso correctamente.");
+    return Ok(new { success = true, data = usuario });
   }
 
 

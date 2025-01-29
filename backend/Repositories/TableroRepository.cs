@@ -79,6 +79,30 @@ public class TableroRepository : ITableroRepository
     }
   }
 
+  public int GetIdPropietario(int id)
+  {
+    string query = @"SELECT id_usuario_propietario 
+                     FROM Tablero 
+                     WHERE id = @Id";
+
+    using (SqliteConnection connection = new SqliteConnection(_connectionString))
+    {
+      connection.Open();
+
+      using (SqliteCommand command = new SqliteCommand(query, connection))
+      {
+        command.Parameters.AddWithValue("@Id", id);
+        object result = command.ExecuteScalar();
+
+        if (result == null)
+        {
+          throw new KeyNotFoundException($"No se encontró el tablero con ID {id}.");
+        }
+        return Convert.ToInt32(result);
+      }
+    }
+  }
+
   public Tablero GetTableroId(int id)
   {
     Tablero tableroBuscado = null;
@@ -189,7 +213,7 @@ public class TableroRepository : ITableroRepository
   {
     if (TieneTarea(id))
     {
-      throw new Exception("No se puede eliminar el tablero porque tiene tareas asignadas.");
+      throw new InvalidOperationException("No se puede eliminar el tablero porque tiene tareas asignadas.");
     }
 
     string query = @"DELETE FROM tablero

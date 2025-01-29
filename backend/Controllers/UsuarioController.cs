@@ -19,69 +19,118 @@ public class UsuarioController : ControllerBase
   }
 
   [HttpGet]
-  public IActionResult Listar()
+  public IActionResult GetUsuarios()
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
       List<GetUsuariosViewModel> usuarios = _usuarioRepository.GetUsuarios();
-      return Ok(usuarios);
+
+      return Ok(new { success = true, data = usuarios });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw new Exception("Error al obtener los usuarios");
+      _logger.LogError(ex.ToString(), "Error al obtener usuarios.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 
   [HttpPost]
-  public IActionResult Crear(CreateUsuarioViewModel usuario)
+  public IActionResult CreateUsuario(CreateUsuarioViewModel usuario)
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+      if (HttpContext.Session.GetInt32("rol") != 1)
+        return StatusCode(403, new { success = false, message = "No tienes permisos necesarios." });
+
+      if (!ModelState.IsValid)
+        return BadRequest(new
+        {
+          success = false,
+          message = "Los datos enviados no son válidos.",
+          errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+        });
+
       Usuario nuevoUsuario = _usuarioRepository.CreateUsuario(usuario);
-      return Created("api/Usuario", nuevoUsuario);
+
+      return Created("api/Usuario", new { success = true, data = nuevoUsuario });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw new Exception("Error al crear al usuario");
+      _logger.LogError(ex.ToString(), "Error al crear usuario.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 
   [HttpPut("{id}")]
-  public IActionResult Modificar(int id, [FromBody] UpdateUsuarioViewModel usuario)
+  public IActionResult UpdateUsuario(int id, [FromBody] UpdateUsuarioViewModel usuario)
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+      if (HttpContext.Session.GetInt32("rol") != 1)
+        return StatusCode(403, new { success = false, message = "No tienes permisos necesarios." });
+
+      if (!ModelState.IsValid)
+        return BadRequest(new
+        {
+          success = false,
+          message = "Los datos enviados no son válidos.",
+          errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+        });
+
       _usuarioRepository.UpdateUsuario(id, usuario);
-      return Ok("Usuario modificado");
+
+      return Ok(new { success = true, message = "Usuario modificado con éxito." });
+    }
+    catch (KeyNotFoundException ex)
+    {
+      _logger.LogWarning(ex.ToString(), "Al actualizar usuario.");
+      return BadRequest(new { success = false, message = ex });
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.ToString());
-      throw new Exception("Error al modificar al usuario");
+      _logger.LogError(ex.ToString(), "Error al modificar usuario.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 
   [HttpDelete("{id}")]
-  public IActionResult Eliminar(int id)
+  public IActionResult DeleteUsuario(int id)
   {
     try
     {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+      if (HttpContext.Session.GetInt32("rol") != 1)
+        return StatusCode(403, new { success = false, message = "No tienes permisos necesarios." });
+
       _usuarioRepository.DeleteUsuario(id);
-      return NoContent();
+
+      return StatusCode(200, new { success = true, message = "Usuario eliminado con éxito." });
     }
-    catch (InvalidOperationException ex) // Captura de excepciones específicas
+    catch (KeyNotFoundException ex)
     {
-      // Maneja casos específicos, como cuando el usuario no puede ser eliminado por estar asociado
-      _logger.LogWarning($"No se pudo eliminar al usuario {id}: {ex.Message}");
-      return BadRequest(new { mensaje = ex.Message }); // Retorna BadRequest con mensaje descriptivo
+      _logger.LogWarning(ex.ToString());
+      return BadRequest(new { success = false, message = ex });
+    }
+    catch (InvalidOperationException ex)
+    {
+      _logger.LogWarning(ex.ToString(), "Al eliminar usuario.");
+      return BadRequest(new { success = false, message = ex });
     }
     catch (Exception ex)
     {
-      // Excepción genérica para cualquier otro error
-      _logger.LogError($"Error al eliminar al usuario {id}: {ex.ToString()}");
-      return StatusCode(500, new { mensaje = "Error interno al intentar eliminar al usuario." }); // Retorna un Internal Server Error
+      _logger.LogError(ex.ToString(), "Error al eliminar usuario.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
     }
   }
 }
