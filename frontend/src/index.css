@@ -15,3 +15,7 @@
   --font-poppins: "Poppins", "serif";
 
 }
+
+body {
+  background-color: var(--color-bg-100);
+}
