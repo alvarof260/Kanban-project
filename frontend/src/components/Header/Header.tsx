@@ -1,6 +1,5 @@
 import { Github, Sun } from "../../icons/"
-import { BtnIcon } from "../BtnIcon/BtnIcon"
-import { Logo } from "../Logo/Logo"
+import { BtnIcon, Logo } from "./components"
 
 
 export const Header = () => {
@@ -12,6 +11,7 @@ export const Header = () => {
         <BtnIcon link="https://github.com/alvarof260/Kanban-project">
           <Github height="1em" width="1em" />
         </BtnIcon>
+
         {/* Necesitamos context para cambiar theme */}
         <BtnIcon>
           <Sun height="1em" width="1em" />
