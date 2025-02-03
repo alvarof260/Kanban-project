@@ -1,10 +1,14 @@
-import './App.css'
-import { Header } from './components'
+import { Header, SideBar } from './components'
+
+// Estructura de clases de tailwind:
+// Caja - flex/grid - Fuente - Colores - Transiciones
 
 function App() {
+
   return (
     <>
       <Header />
+      <SideBar />
     </>
   )
 }
