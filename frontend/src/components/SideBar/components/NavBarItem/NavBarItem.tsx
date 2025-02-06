@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { ReactNode } from "react";
 
 interface Props {
   children: ReactNode
@@ -13,5 +13,5 @@ export const NavBarItem = ({ children, label }: Props) => {
       {children}
       <p className='text-lg font-poppins'>{label}</p>
     </li>
-  )
-}
+  );
+};

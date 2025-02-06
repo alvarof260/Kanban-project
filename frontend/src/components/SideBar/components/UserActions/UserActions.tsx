@@ -1,5 +1,5 @@
-import { LogOut, Setting } from "../../../../icons"
-import { NavBarItem } from "../NavBarItem/NavBarItem"
+import { LogOut, Setting } from "../../../../icons";
+import { NavBarItem } from "../NavBarItem/NavBarItem";
 
 export const UserActions = () => {
   return (
@@ -13,5 +13,5 @@ export const UserActions = () => {
         </NavBarItem>
       </ul>
     </section>
-  )
-}
+  );
+};

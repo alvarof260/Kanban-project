@@ -1,4 +1,4 @@
-import { ProfileSummary, NavBar, UserActions } from "./components"
+import { ProfileSummary, NavBar, UserActions } from "./components";
 
 export const SideBar = () => {
   return (
@@ -11,5 +11,5 @@ export const SideBar = () => {
       <UserActions />
 
     </aside>
-  )
-}
+  );
+};

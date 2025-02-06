@@ -1,4 +1,4 @@
-import { ProfileIcon, ProfileInfo } from "../"
+import { ProfileIcon, ProfileInfo } from "../";
 
 export const ProfileSummary = () => {
   return (
@@ -6,5 +6,5 @@ export const ProfileSummary = () => {
       <ProfileIcon />
       <ProfileInfo />
     </section>
-  )
-}
+  );
+};

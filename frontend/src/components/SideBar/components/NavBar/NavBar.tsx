@@ -1,5 +1,5 @@
-import { ClipBoard, Plus } from "../../../../icons"
-import { NavBarItem } from "../NavBarItem/NavBarItem"
+import { ClipBoard, Plus } from "../../../../icons";
+import { NavBarItem } from "../NavBarItem/NavBarItem";
 
 export const NavBar = () => {
   return (
@@ -15,5 +15,5 @@ export const NavBar = () => {
         </ul>
       </nav>
     </section>
-  )
-}
+  );
+};
