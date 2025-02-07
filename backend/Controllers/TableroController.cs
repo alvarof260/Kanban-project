@@ -37,6 +37,27 @@ public class TableroController : ControllerBase
     }
   }
 
+  [HttpGet("{id}")]
+  public IActionResult GetTablerosByIdUsuario(int id)
+  {
+    try
+    {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+
+      List<GetTablerosViewModel> tableros = _tableroRepository.GetTableros();
+
+      return Ok(new { success = true, data = tableros });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString(), "Error al obtener tableros.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
+
+    }
+  }
+
   [HttpPost]
   public IActionResult CreateTablero(CreateTableroViewModel tablero)
   {

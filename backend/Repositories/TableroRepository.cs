@@ -16,7 +16,7 @@ public class TableroRepository : ITableroRepository
 
   public Tablero CreateTablero(CreateTableroViewModel tablero)
   {
-    Tablero nuevoTablero = null;
+    Tablero? nuevoTablero = null;
 
     string query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) 
                      VALUES (@IdUsuarioPropietario, @Nombre, @Descripcion);
@@ -146,7 +146,7 @@ public class TableroRepository : ITableroRepository
   {
     List<GetTablerosViewModel> tableros = new List<GetTablerosViewModel>();
 
-    string query = @"SELECT id_usuario_propietario, nombre, descripcion 
+    string query = @"SELECT id, id_usuario_propietario, nombre, descripcion 
                      FROM Tablero;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -161,9 +161,10 @@ public class TableroRepository : ITableroRepository
         {
           tableros.Add(new GetTablerosViewModel
           {
-            IdUsuarioPropietario = reader.GetInt32(0),
-            Nombre = reader.GetString(1),
-            Descripcion = reader.GetString(2)
+            Id = reader.GetInt32(0),
+            IdUsuarioPropietario = reader.GetInt32(1),
+            Nombre = reader.GetString(2),
+            Descripcion = reader.GetString(3)
           });
         }
       }
@@ -178,9 +179,10 @@ public class TableroRepository : ITableroRepository
   {
     List<GetTablerosViewModel> tablerosBuscado = new List<GetTablerosViewModel>();
 
-    string query = @"SELECT id_usuario_propietario, nombre, descripcion
-                     FROM Tablero
-                     WHERE id_usuario_propietario = @Id;";
+    string query = @"SELECT DISTINCT t.id, t.id_usuario_propietario, t.nombre, t.descripcion
+                     FROM Tablero t
+                     RIGHT JOIN Tarea ta ON t.id = ta.id_tablero
+                     WHERE t.id_usuario_propietario = @Id OR ta.id_usuario_asignado = @Id;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
@@ -196,9 +198,10 @@ public class TableroRepository : ITableroRepository
         {
           tablerosBuscado.Add(new GetTablerosViewModel
           {
-            IdUsuarioPropietario = reader.GetInt32(0),
-            Nombre = reader.GetString(1),
-            Descripcion = reader.GetString(2)
+            Id = reader.GetInt32(0),
+            IdUsuarioPropietario = reader.GetInt32(1),
+            Nombre = reader.GetString(2),
+            Descripcion = reader.GetString(3)
           });
         }
       }
