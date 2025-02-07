@@ -181,7 +181,7 @@ public class TableroRepository : ITableroRepository
 
     string query = @"SELECT DISTINCT t.id, t.id_usuario_propietario, t.nombre, t.descripcion
                      FROM Tablero t
-                     RIGHT JOIN Tarea ta ON t.id = ta.id_tablero
+                     LEFT JOIN Tarea ta ON t.id = ta.id_tablero
                      WHERE t.id_usuario_propietario = @Id OR ta.id_usuario_asignado = @Id;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))

@@ -46,7 +46,7 @@ public class TableroController : ControllerBase
         return Unauthorized(new { success = false, message = "No has iniciado sesión." });
 
 
-      List<GetTablerosViewModel> tableros = _tableroRepository.GetTableros();
+      List<GetTablerosViewModel> tableros = _tableroRepository.GetTablerosIdUsuario(id);
 
       return Ok(new { success = true, data = tableros });
     }
