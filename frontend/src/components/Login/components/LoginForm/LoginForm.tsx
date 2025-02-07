@@ -34,6 +34,7 @@ export const LoginForm = () => {
       }
 
       setUser(jsonData.data ? jsonData.data : null);
+      localStorage.setItem("user", JSON.stringify(jsonData.data));
       navigate("/home");
     } catch (err) {
       console.error("Error:", err);

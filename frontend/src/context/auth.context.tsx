@@ -26,7 +26,11 @@ export const useAuthContext = () => {
 };
 
 export const AuthProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const localStorageUser = localStorage.getItem("user");
+
+    return localStorageUser ? JSON.parse(localStorageUser) : null;
+  });
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
