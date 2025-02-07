@@ -15,7 +15,7 @@ function App({ children }: Props) {
       <Header />
       <div className='flex flex-row'>
         <SideBar />
-        <main>
+        <main className='w-full'>
           {children}
         </main>
       </div>

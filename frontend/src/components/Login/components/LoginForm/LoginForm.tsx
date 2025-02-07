@@ -28,12 +28,12 @@ export const LoginForm = () => {
 
       const jsonData: { success: boolean, data?: User, message?: string } = await response.json(); // mejorar el backend con las respuestas consistentes
 
-      if (!jsonData.success) {
+      if (!jsonData.success || !jsonData.data) {
         console.error("Error de autenticación:", jsonData.message);
         return;
       }
 
-      setUser(jsonData.data ? jsonData.data : null);
+      setUser(jsonData.data);
       localStorage.setItem("user", JSON.stringify(jsonData.data));
       navigate("/home");
     } catch (err) {
