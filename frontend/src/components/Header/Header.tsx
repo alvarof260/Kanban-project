@@ -1,10 +1,10 @@
-import { Github, Sun } from "../../icons/"
-import { BtnIcon, Logo } from "./components"
+import { Github, Sun } from "../../icons/";
+import { BtnIcon, Logo } from "./components";
 
 
 export const Header = () => {
   return (
-    <header className='bg-bg-100 w-screen h-12 flex flex-row items-center justify-between px-5'>
+    <header className='bg-bg-100 border-b border-b-bg-200 w-screen h-12 flex flex-row items-center justify-between px-5'>
       <Logo />
 
       <section className="flex flex-row items-center gap-2">
@@ -18,5 +18,5 @@ export const Header = () => {
         </BtnIcon>
       </section>
     </header>
-  )
-}
+  );
+};

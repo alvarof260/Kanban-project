@@ -1,23 +1,24 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Login, SideBar } from './components';
-import { AuthProvider } from './context/auth.context';
+import { Header, SideBar } from './components';
+import { ReactNode } from 'react';
 
 // Estructura de clases de tailwind:
 // Caja - flex/grid - Fuente - Colores - Transiciones
 
-function App() {
+interface Props {
+  children: ReactNode;
+}
 
+function App({ children }: Props) {
 
   return (
     <>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path='/' element={<Login />} />
-            <Route path='/home' element={<SideBar />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <Header />
+      <div className='flex flex-row'>
+        <SideBar />
+        <main>
+          {children}
+        </main>
+      </div>
     </>
   );
 }

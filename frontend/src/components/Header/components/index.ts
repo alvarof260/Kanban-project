@@ -1,2 +1,2 @@
-export * from "./BtnIcon/BtnIcon"
-export * from "./Logo/Logo"
+export * from "./BtnIcon/BtnIcon";
+export * from "./Logo/Logo";
