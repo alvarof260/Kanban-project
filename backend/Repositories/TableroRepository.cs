@@ -146,8 +146,9 @@ public class TableroRepository : ITableroRepository
   {
     List<GetTablerosViewModel> tableros = new List<GetTablerosViewModel>();
 
-    string query = @"SELECT id, id_usuario_propietario, nombre, descripcion 
-                     FROM Tablero;";
+    string query = @"SELECT t.id, u.nombre_de_usuario , t.nombre, t.descripcion 
+                     FROM Tablero t
+                     LEFT JOIN Usuario u ON t.id_usuario_propietario = u.id;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
@@ -162,7 +163,7 @@ public class TableroRepository : ITableroRepository
           tableros.Add(new GetTablerosViewModel
           {
             Id = reader.GetInt32(0),
-            IdUsuarioPropietario = reader.GetInt32(1),
+            NombreUsuarioPropietario = reader.GetString(1),
             Nombre = reader.GetString(2),
             Descripcion = reader.GetString(3)
           });
@@ -179,10 +180,15 @@ public class TableroRepository : ITableroRepository
   {
     List<GetTablerosViewModel> tablerosBuscado = new List<GetTablerosViewModel>();
 
-    string query = @"SELECT DISTINCT t.id, t.id_usuario_propietario, t.nombre, t.descripcion
-                     FROM Tablero t
-                     LEFT JOIN Tarea ta ON t.id = ta.id_tablero
-                     WHERE t.id_usuario_propietario = @Id OR ta.id_usuario_asignado = @Id;";
+    string query = @"SELECT DISTINCT t.id, 
+                            COALESCE(u_t.nombre_de_usuario,u_p.nombre_de_usuario) AS nombre_de_usuario, 
+                            t.nombre, 
+                            t.descripcion   
+                     FROM Tablero t                                                       
+                     LEFT JOIN Tarea ta ON t.id = ta.id_tablero                         
+                     LEFT JOIN Usuario u_t ON ta.id_usuario_asignado = u_t.id
+                     LEFT JOIN Usuario u_p ON t.id_usuario_propietario = u_p.id                
+                     WHERE t.id_usuario_propietario = 2 OR ta.id_usuario_asignado = 2;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
@@ -199,7 +205,7 @@ public class TableroRepository : ITableroRepository
           tablerosBuscado.Add(new GetTablerosViewModel
           {
             Id = reader.GetInt32(0),
-            IdUsuarioPropietario = reader.GetInt32(1),
+            NombreUsuarioPropietario = reader.GetString(1),
             Nombre = reader.GetString(2),
             Descripcion = reader.GetString(3)
           });
