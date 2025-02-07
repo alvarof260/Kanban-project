@@ -50,6 +50,21 @@ public class LoginController : ControllerBase
     return Ok(new { success = true, data = usuario });
   }
 
+  [HttpPost("logout")]
+  public IActionResult LogOut()
+  {
+    try
+    {
+      HttpContext.Session.Clear();
 
+      Response.Cookies.Delete(".AspNetCore.Session");
 
+      return Ok(new { success = true, message = "Sesión cerrada correctamente." });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError("Error al cerrar sesión: " + ex.Message);
+      return StatusCode(500, new { success = false, message = "Error al cerrar sesión." });
+    }
+  }
 }
