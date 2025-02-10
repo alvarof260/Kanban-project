@@ -1,0 +1,3 @@
+- mejorar el auth
+- cambiar respuestas del backend
+- cambios de services

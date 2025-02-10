@@ -45,7 +45,6 @@ public class TableroController : ControllerBase
       if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
         return Unauthorized(new { success = false, message = "No has iniciado sesión." });
 
-
       List<GetTablerosViewModel> tableros = _tableroRepository.GetTablerosIdUsuario(id);
 
       return Ok(new { success = true, data = tableros });

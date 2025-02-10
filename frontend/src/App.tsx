@@ -1,9 +1,6 @@
 import { Header, SideBar } from './components';
 import { ReactNode } from 'react';
 
-// Estructura de clases de tailwind:
-// Caja - flex/grid - Fuente - Colores - Transiciones
-
 interface Props {
   children: ReactNode;
 }
@@ -13,9 +10,9 @@ function App({ children }: Props) {
   return (
     <>
       <Header />
-      <div className='flex flex-row'>
+      <div className='flex flex-row h-[calc(100vh - 48px)]'>
         <SideBar />
-        <main className='w-full'>
+        <main>
           {children}
         </main>
       </div>

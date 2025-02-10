@@ -40,17 +40,5 @@ export const Boards = () => {
   }, [user?.id]);
 
   return (
-    <>
-      <section className="p-8 w-full h-full grid grid-cols-6 grid-rows-6 gap-5">
-        {boards.map((board) => (
-          <BoardCard
-            key={board.id}
-            name={board.nombre}
-            description={board.descripcion}
-            owner={board.nombreUsuarioPropietario}
-          />
-        ))}
-      </section>
-    </>
   );
 };
