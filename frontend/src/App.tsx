@@ -1,13 +1,21 @@
+import { BrowserRouter, Route } from "react-router";
 import { SessionProvider } from "./context/session.context";
-import { Login } from "./pages";
+import { Boards, Login } from "./pages";
+import { Routes } from "react-router";
+import { PrivateGuard } from "./guard/PrivateGuard";
 
 function App() {
   return (
-    <SessionProvider>
-      <div className='w-screen h-screen bg-gray-100 flex justify-center items-center'>
-        <Login />
-      </div>
-    </SessionProvider>
+    <BrowserRouter>
+      <SessionProvider>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route element={<PrivateGuard />}>
+            <Route path="/boards" element={<Boards />} />
+          </Route>
+        </Routes>
+      </SessionProvider>
+    </BrowserRouter>
   );
 }
 

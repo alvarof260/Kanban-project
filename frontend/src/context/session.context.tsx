@@ -1,5 +1,6 @@
-import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { User } from "../models";
+import { useNavigate } from "react-router";
 
 interface SessionContextType {
   user: User | null;
@@ -33,15 +34,18 @@ export const SessionProvider = ({ children }: Props) => {
       return null;
     }
   });
+  const navigate = useNavigate();
 
   const login = (user: User) => {
     setUser(user);
     localStorage.setItem('user', JSON.stringify(user));
+    navigate("/boards");
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    navigate("/");
   };
 
   return (
