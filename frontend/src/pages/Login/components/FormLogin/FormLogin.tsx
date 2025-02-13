@@ -1,5 +1,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { FormField } from "../";
+import { User } from "../../../../models";
+import { useSessionContext } from "../../../../context/session.context";
 
 interface FormData {
   nombreDeUsuario: string;
@@ -10,13 +12,6 @@ const initialStateFormData: FormData = {
   nombreDeUsuario: "",
   password: ""
 };
-
-interface User {
-  id: number;
-  nombreDeUsuario: string;
-  password: string;
-  rolUsuario: number;
-}
 
 interface ResponseFetch {
   success: boolean;
@@ -61,6 +56,7 @@ function validateForm(values: FormData) {
 export const LoginForm = () => {
   const [formData, setFormData] = useState<FormData>(initialStateFormData);
   const [error, setError] = useState<FormErrors>({});
+  const { login } = useSessionContext();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -74,6 +70,7 @@ export const LoginForm = () => {
 
     if (Object.keys(validationErrors).length > 0) {
       setError(validationErrors);
+      setFormData(initialStateFormData);
       return;
     }
 
@@ -99,7 +96,8 @@ export const LoginForm = () => {
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify(data.data));
+      setFormData(initialStateFormData);
+      login(data.data);
     } catch (err) {
       console.error("Error:", err);
     }
