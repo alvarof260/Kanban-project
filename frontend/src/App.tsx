@@ -1,22 +1,10 @@
-import { Header, SideBar } from './components';
-import { ReactNode } from 'react';
+import { Login } from "./pages";
 
-interface Props {
-  children: ReactNode;
-}
-
-function App({ children }: Props) {
-
+function App() {
   return (
-    <>
-      <Header />
-      <div className='flex flex-row h-[calc(100vh - 48px)]'>
-        <SideBar />
-        <main>
-          {children}
-        </main>
-      </div>
-    </>
+    <div className='w-screen h-screen bg-gray-100 flex justify-center items-center'>
+      <Login />
+    </div>
   );
 }
 
