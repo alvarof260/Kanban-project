@@ -6,8 +6,6 @@ namespace Kanban.ViewModels;
 public class CreateTareaViewModel
 {
   [Required]
-  public int IdTablero { get; set; }
-  [Required]
   [StringLength(100, ErrorMessage = "El nombre de tarea no debe exceder los 100 caracteres.")]
   public string Nombre { get; set; }
   [Required]

@@ -35,6 +35,7 @@ public class TareaRepository : ITareaRepository
       command.Parameters.AddWithValue("@Estado", tarea.Estado);
       command.Parameters.AddWithValue("@Descripcion", tarea.Descripcion);
       command.Parameters.AddWithValue("@Color", tarea.Color);
+      command.Parameters.AddWithValue("@IdUsuarioAsignado", 0);
 
       int idGenerado = Convert.ToInt32(command.ExecuteScalar());
 
@@ -46,7 +47,7 @@ public class TareaRepository : ITareaRepository
         Estado = tarea.Estado,
         Descripcion = tarea.Descripcion,
         Color = tarea.Color,
-        IdUsuarioAsignado = null
+        IdUsuarioAsignado = 0
       };
 
       connection.Close();
@@ -136,7 +137,7 @@ public class TareaRepository : ITareaRepository
   {
     List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
 
-    string query = @"SELECT id_tablero, nombre, estado, descripcion, color, id_usuario_asignado 
+    string query = @"SELECT id, nombre, estado, descripcion, color, id_usuario_asignado 
                      FROM Tarea 
                      WHERE id_usuario_asignado = @Id;";
 
@@ -153,7 +154,7 @@ public class TareaRepository : ITareaRepository
         {
           tareas.Add(new GetTareasViewModel
           {
-            IdTablero = reader.GetInt32(1),
+            IdTarea = reader.GetInt32(1),
             Nombre = reader.GetString(2),
             Estado = (EstadoTarea)reader.GetInt32(3),
             Descripcion = reader.GetString(4),
@@ -172,7 +173,7 @@ public class TareaRepository : ITareaRepository
   {
     List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
 
-    string query = @"SELECT id_tablero, nombre, estado, descripcion, color, id_usuario_asignado
+    string query = @"SELECT id, nombre, estado, descripcion, color, id_usuario_asignado
                      FROM Tarea 
                      WHERE id_tablero = @Id;";
 
@@ -189,12 +190,12 @@ public class TareaRepository : ITareaRepository
         {
           tareas.Add(new GetTareasViewModel
           {
-            IdTablero = reader.GetInt32(1),
-            Nombre = reader.GetString(2),
-            Estado = (EstadoTarea)reader.GetInt32(3),
-            Descripcion = reader.GetString(4),
-            Color = reader.GetString(5),
-            IdUsuarioAsignado = reader.GetInt32(6)
+            IdTarea = reader.GetInt32(0),
+            Nombre = reader.GetString(1),
+            Estado = (EstadoTarea)reader.GetInt32(2),
+            Descripcion = reader.GetString(3),
+            Color = reader.GetString(4),
+            IdUsuarioAsignado = reader.GetInt32(5)
           });
         }
       }
