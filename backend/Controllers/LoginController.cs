@@ -22,32 +22,44 @@ public class LoginController : ControllerBase
   [HttpPost]
   public IActionResult Login([FromBody] LoginViewModel model)
   {
-    if (!ModelState.IsValid)
-      return BadRequest(new
+    try
+    {
+      if (!ModelState.IsValid)
+        return BadRequest(new
+        {
+          success = false,
+          message = "Los datos enviados no son válidos.",
+        });
+
+      if (string.IsNullOrEmpty(model.NombreDeUsuario) && string.IsNullOrEmpty(model.Password))
       {
-        success = false,
-        message = "Los datos enviados no son válidos.",
-        errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
-      });
+        return BadRequest(new { success = false, message = "Por favor debe ingresar su usuario y contraseña." });
+      }
 
-    if (string.IsNullOrEmpty(model.NombreDeUsuario) && string.IsNullOrEmpty(model.Password))
-    {
-      return BadRequest(new { success = false, message = "Por favor debe ingresar su usuario y contraseña." });
+      Usuario usuario = _usuarioRepository.GetUsuarioNombre(model.NombreDeUsuario);
+
+      if (usuario == null || usuario.Password != model.Password)
+      {
+        _logger.LogInformation("Intento de acceso invalido - Usuario: " + model.NombreDeUsuario + " Clave ingresada: " + model.Password + ".");
+        return Unauthorized(new { success = false, message = "Usuario o contraseña incorrectos." });
+      }
+
+      HttpContext.Session.SetString("IsAuthenticated", "true");
+      HttpContext.Session.SetString("nombre", usuario.NombreDeUsuario);
+      HttpContext.Session.SetInt32("rol", Convert.ToInt32(usuario.RolUsuario));
+      _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + " ingreso correctamente.");
+      return Ok(new { success = true, message = "Usuario ingreso correctamente", data = usuario });
     }
-
-    Usuario usuario = _usuarioRepository.GetUsuarioNombre(model.NombreDeUsuario);
-
-    if (usuario == null || usuario.Password != model.Password)
+    catch (KeyNotFoundException ex)
     {
-      _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + "introdujo mal los datos.");
-      return Unauthorized(new { success = false, mensaje = "Usuario o contraseña incorrectos." });
+      _logger.LogError("Error al cerrar sesión: " + ex.Message);
+      return StatusCode(500, new { success = false, message = ex.Message });
     }
+    catch (System.Exception)
+    {
 
-    HttpContext.Session.SetInt32("id", usuario.Id);
-    HttpContext.Session.SetString("nombre", usuario.NombreDeUsuario);
-    HttpContext.Session.SetInt32("rol", Convert.ToInt32(usuario.RolUsuario));
-    _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + " ingreso correctamente.");
-    return Ok(new { success = true, data = usuario });
+      throw;
+    }
   }
 
   [HttpPost("logout")]
