@@ -1,1 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-background-primary: #000000;
+  /* Fondo más oscuro (Negro absoluto) */
+  --color-background-secondary: #161616;
+  /* Fondo secundario oscuro */
+  --color-background-tertiary: #2c2c2c;
+  /* Fondo terciario, usado en secciones destacadas */
+
+  --color-primary-dark: #333333;
+  /* Color principal oscuro */
+  --color-primary-medium: #5c5c5c;
+  /* Color principal medio */
+  --color-primary-light: #b9b9b9;
+  /* Color principal claro */
+
+  --color-accent-dark: #666666;
+  /* Acento oscuro, ideal para bordes y detalles */
+  --color-accent-light: #f7f7f7;
+  /* Acento claro, usado para contrastes sutiles */
+
+  --color-text-light: #FFFFFF;
+  /* Texto principal en fondos oscuros */
+  --color-text-muted: #e0e0e0;
+  /* Texto secundario, menos resaltado */
+
+
+  --font-rubik: "Rubik", serif;
+}
+
+* {
+  font-family: var(--font-rubik);
+}

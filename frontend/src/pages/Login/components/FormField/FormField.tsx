@@ -15,10 +15,10 @@ interface FormFieldProps {
 export const FormField = ({ label, name, type, maxLength, placeholder, value, onChangeValue, error }: FormFieldProps) => {
 
   return (
-    <section className="flex flex-col justify-start gap-2 w-full">
-      <label className='text-md font-medium text-gray-50' htmlFor={name}>{label}</label>
+    <section className="flex flex-col justify-start gap-2 h-28 w-full">
+      <label className='text-sm font-medium text-text-light' htmlFor={name}>{label}</label>
       <input
-        className='bg-gray-600 rounded-xs px-1 py-2'
+        className='border border-accent-dark/30 bg-transparent rounded-md px-3 py-2 text-sm text-text-muted outline-none focus:border-accent-light'
         id={name}
         name={name}
         type={type}
@@ -27,7 +27,7 @@ export const FormField = ({ label, name, type, maxLength, placeholder, value, on
         value={value}
         onChange={onChangeValue}
       />
-      {error && <p className="text-xs font-semibold text-red-500">{error.message}</p>}
+      {error && <p className="text-xs font-medium text-red-500/70 mt-2">{error.message}</p>}
     </section>
   );
 };

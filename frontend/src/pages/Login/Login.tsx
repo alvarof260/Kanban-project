@@ -2,7 +2,7 @@ import { WrapperForm, LoginForm } from "./components";
 
 export const Login = () => {
   return (
-    <div className='w-screen h-screen bg-gray-100 flex justify-center items-center'>
+    <div className='bg-background-primary w-screen h-screen flex justify-center items-center'>
       <WrapperForm>
         <LoginForm />
       </WrapperForm>

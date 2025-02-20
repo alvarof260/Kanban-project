@@ -2,7 +2,6 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { FormField } from "../";
 import { User } from "../../../../models";
 import { useSessionContext } from "../../../../context/session.context";
-import { useNavigate } from "react-router";
 
 interface FormData {
   nombreDeUsuario: string;
@@ -105,7 +104,7 @@ export const LoginForm = () => {
   };
 
   return (
-    <form className="flex flex-col items-center w-60" onSubmit={handleSubmit} >
+    <form className="flex flex-col h-full w-full items-center justify-start " onSubmit={handleSubmit} >
       <FormField
         label="usuario"
         name="nombreDeUsuario"
@@ -126,7 +125,11 @@ export const LoginForm = () => {
         onChangeValue={handleChange}
         error={error.password}
       />
-      <button className='bg-green-400 rounded-xs p-2 mt-6 text-gray-800 text-md font-semibold w-full'>Iniciar Sesión</button>
+      <button
+        className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300 mt-12"
+      >
+        Iniciar Sesión
+      </button>
     </form>
   );
 };
