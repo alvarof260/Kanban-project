@@ -5,9 +5,9 @@ namespace Kanban.ViewModels;
 public class LoginViewModel
 {
   [Required]
-  [StringLength(100, ErrorMessage = "El nombre de usuario no debe exceder los 100 caracteres.")]
+  [StringLength(50, ErrorMessage = "El nombre de usuario no debe exceder los 50 caracteres.")]
   public string NombreDeUsuario { get; set; }
   [Required]
-  [StringLength(100, ErrorMessage = "La contraseña no debe superar los 100 caracteres")]
+  [StringLength(50, ErrorMessage = "La contraseña no debe superar los 50 caracteres")]
   public string Password { get; set; }
 }
