@@ -1,3 +1,4 @@
+import { Plus } from "../../../../icons";
 
 interface ButtonAddBoardProps {
   onModal: () => void;
@@ -5,11 +6,17 @@ interface ButtonAddBoardProps {
 
 export const ButtonAddBoard = ({ onModal }: ButtonAddBoardProps) => {
   return (
-    <button
-      className="bg-green-500 h-20 w-20 rounded-full text-3xl font-bold text-gray-50 flex items-center justify-center"
-      onClick={onModal}
-    >
-      +
-    </button>
+    <div className="relative flex justify-center">
+      <button
+        className="bg-transparent rounded-md border border-accent-dark/30 p-6 min-w-86 h-40 text-text-light flex justify-center items-center font-medium text-2xl cursor-pointer hover:bg-background-tertiary/70 relative group"
+        onClick={onModal}
+      >
+        <Plus />
+        {/* Tooltip */}
+        <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-text-light text-background-primary text-sm font-medium px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap shadow-lg">
+          Agregar Tablero
+        </span>
+      </button>
+    </div>
   );
 };

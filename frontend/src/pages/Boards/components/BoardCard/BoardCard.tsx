@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { CardActions, CardBody, CardHeader } from "..";
 
 interface BoardCardProps {
   id: number;
@@ -9,12 +10,19 @@ interface BoardCardProps {
 
 export const BoardCard = ({ id, label, nombre, descripcion }: BoardCardProps) => {
   return (
-    <Link to={`/board/${id}`} className="cursor-pointer">
-      <article className="bg-gray-800 p-3 rounded-xs h-52 w-64">
-        <h2 className="text-2xl font-bold text-gray-50">{nombre}</h2>
-        <p className="text-md font-medium text-gray-400">{descripcion}</p>
-        <span className="text-xs font-light text-gray-50">{label}</span>
-      </article>
-    </Link>
+    <article className="bg-transparent rounded-md border border-accent-dark/30 p-6 min-w-86 h-40">
+      <CardHeader>
+        <section>
+          <Link to={`/board/${id}`} className="cursor-pointer">
+            <h2 className="text-2xl font-semibold text-text-light">{nombre}</h2>
+          </Link >
+          <span className="text-xs font-normal text-primary-medium">Creado por {label}</span>
+        </section>
+        <CardActions />
+      </CardHeader>
+      <CardBody>
+        <p className="text-base font-normal text-text-muted">{descripcion}</p>
+      </CardBody>
+    </article>
   );
 };

@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+import { XMark } from "../../icons";
 
 interface CustomModalProps {
   children: ReactNode;
@@ -7,14 +9,14 @@ interface CustomModalProps {
 export const CustomModal = ({ children, onModal }: CustomModalProps) => {
   return (
     <section className="fixed w-screen h-screen inset-0 flex justify-center items-center bg-black/75">
-      <article className="bg-gray-800 px-4 py-6 rounded-xs w-98 h-88 flex flex-col justify-around items-center">
-        {children}
+      <article className="relative bg-background-secondary border border-accent-dark/30 rounded-md p-6 w-98 h-88 flex flex-col">
         <button
-          className="bg-red-500 px-2 rounded-xs cursor-pointer w-full py-2"
+          className="absolute top-3 right-3 h-8 w-8 text-accent-dark/70 text-sm cursor-pointer flex justify-center items-center hover:text-text-light transition duration-300 ease-in "
           onClick={onModal}
         >
-          cerrar
+          <XMark />
         </button>
+        {children}
       </article>
     </section>
   );

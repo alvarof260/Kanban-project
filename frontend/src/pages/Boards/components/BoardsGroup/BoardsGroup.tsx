@@ -6,7 +6,7 @@ interface BoardGroupProps {
 
 export const BoardGroup = ({ children }: BoardGroupProps) => {
   return (
-    <section className="flex flex-row gap-8 items-center justify-start">
+    <section className="w-full flex flex-row gap-4 flex-wrap justify-start items-start">
       {children}
     </section>
   );

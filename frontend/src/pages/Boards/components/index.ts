@@ -3,3 +3,6 @@ export * from "./BoardForm/BoardForm";
 export * from "./ButtonAddBoard/ButtonAddBoard";
 export * from "./BoardCard/BoardCard";
 export * from "./BoardsGroup/BoardsGroup";
+export * from "./CardHeader/CardHeader";
+export * from "./CardBody/CardBody";
+export * from "./CardActions/CardActions";

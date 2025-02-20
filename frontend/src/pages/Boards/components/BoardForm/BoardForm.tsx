@@ -65,7 +65,11 @@ export const BoardForm = ({ onAddBoard }: BoardFormProps) => {
     <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit}>
       <InputForm label="Nombre:" type="text" name="nombre" placeholder="nombre de tablero" value={formData.nombre} onChange={handleChangeInput} maxLength={50} />
       <InputForm label="Descripcion:" type="text" name="descripcion" placeholder="descripcion de tablero" value={formData.descripcion} onChange={handleChangeInput} maxLength={255} />
-      <button className="bg-green-500 py-2 rounded-xs">Enviar</button>
+      <button
+        className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300 mt-12"
+      >
+        Enviar
+      </button>
     </form>
   );
 };

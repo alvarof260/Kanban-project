@@ -3,6 +3,7 @@ import { useSessionContext } from "../../context/session.context";
 import { CustomModal } from "../../components";
 import { Board } from "../../models";
 import { BoardGroup, BoardCard, ButtonAddBoard, BoardForm } from "./components";
+import { getBoards } from "../../services";
 
 export const Boards = () => {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -11,14 +12,12 @@ export const Boards = () => {
 
   useEffect(() => {
     const fetchBoards = async () => {
-      const options: RequestInit = {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include"
-      };
+      if (!user?.id) {
+        return;
+      }
 
       try {
-        const response = await fetch(`http://localhost:5093/api/Tablero/${user?.id}`, options);
+        const response = await getBoards(user?.id);
 
         if (!response.ok) {
           throw new Error('Error al conectar con el serivdor.');
@@ -51,7 +50,7 @@ export const Boards = () => {
   };
 
   return (
-    <main className="w-screen h-screen bg-gray-100 p-10">
+    <main className="w-screen h-screen bg-background-primary p-10">
       <BoardGroup>
         {boards.map((board) =>
           <BoardCard
