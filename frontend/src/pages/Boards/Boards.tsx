@@ -1,64 +1,32 @@
-import { useEffect, useState } from "react";
-import { useSessionContext } from "../../context/session.context";
+import { useState } from "react";
+import { useSessionContext } from "../../contexts/session.context";
 import { CustomModal } from "../../components";
 import { Board } from "../../models";
 import { BoardGroup, BoardCard, ButtonAddBoard, BoardForm } from "./components";
 import { getBoards } from "../../services";
+import { useFetch } from "../../hooks";
 
 export type Modals = "create" | "edit" | "delete" | "none";
 
 export const Boards = () => {
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [isOpen, setIsOpen] = useState<Modals>("none");
   const { user } = useSessionContext();
-
-  useEffect(() => {
-    const fetchBoards = async () => {
-      if (!user?.id) {
-        return;
-      }
-
-      try {
-        const response = await getBoards(user?.id);
-
-        if (!response.ok) {
-          throw new Error('Error al conectar con el serivdor.');
-        }
-
-        const data: { success: boolean, data: Board[] } = await response.json();
-
-        if (!data.success) {
-          return;
-        }
-
-        console.log(data.data);
-
-        setBoards(data.data);
-      } catch (err) {
-        console.error("Error:", err);
-      }
-    };
-    fetchBoards();
-  }, [user?.id]);
+  const { data: boards, setData: setBoards } = useFetch<Board[]>(() => getBoards(user.id));
+  const [isOpen, setIsOpen] = useState<Modals>("none");
 
   const handleModal = (newState: Modals) => {
     setIsOpen(newState);
   };
 
   const handleAddBoard = (newBoard: Board, newState: Modals) => {
-    const newBoards = [...boards, newBoard];
+    const newBoards = [...(boards ?? []), newBoard];
     setBoards(newBoards);
     setIsOpen(newState);
   };
 
-  if (!user) {
-    return;
-  }
-
   return (
     <main className="w-screen h-screen bg-background-primary p-10">
       <BoardGroup>
-        {boards.map((board) =>
+        {(boards ?? []).map((board) =>
           <BoardCard
             key={board.id}
             id={board.id}

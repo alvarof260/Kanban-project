@@ -1,8 +1,8 @@
 import { BrowserRouter, Route } from "react-router";
-import { SessionProvider } from "./context/session.context";
+import { SessionProvider } from "./contexts/session.context";
 import { Board, Boards, Login } from "./pages";
 import { Routes } from "react-router";
-import { PrivateGuard } from "./guard/PrivateGuard";
+import { PrivateGuard } from "./guards/PrivateGuard";
 
 function App() {
   return (

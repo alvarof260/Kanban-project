@@ -3,7 +3,7 @@ import { User } from "../models";
 import { useNavigate } from "react-router";
 
 interface SessionContextType {
-  user: User | null;
+  user: User;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -24,11 +24,18 @@ export const useSessionContext = () => {
   return context;
 };
 
+const initialStateUser: User = {
+  id: 0,
+  nombreDeUsuario: "",
+  password: "",
+  rolUsuario: 1
+};
+
 export const SessionProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<User | null>(() => {
+  const [user, setUser] = useState<User>(() => {
     try {
       const localStorageUser = localStorage.getItem("user");
-      return localStorageUser ? JSON.parse(localStorageUser) : null;
+      return localStorageUser ? JSON.parse(localStorageUser) : initialStateUser;
     } catch (error) {
       console.error("Error al parsear el usuario de localStorage:", error);
       return null;
@@ -43,7 +50,7 @@ export const SessionProvider = ({ children }: Props) => {
   };
 
   const logout = () => {
-    setUser(null);
+    setUser(initialStateUser);
     localStorage.removeItem('user');
     navigate("/");
   };

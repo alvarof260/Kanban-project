@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from "react";
-import { useSessionContext } from "../../../../context/session.context";
+import { useSessionContext } from "../../../../contexts/session.context";
 import { Board } from "../../../../models";
 import { InputForm } from "..";
 import { Modals } from "../../Boards";

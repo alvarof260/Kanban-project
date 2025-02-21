@@ -1,5 +1,5 @@
 import { LoginSchema, LoginValues, User } from "../../../../models";
-import { useSessionContext } from "../../../../context/session.context";
+import { useSessionContext } from "../../../../contexts/session.context";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InputForm } from "../../../../components";
