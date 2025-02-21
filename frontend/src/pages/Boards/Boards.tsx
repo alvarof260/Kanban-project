@@ -5,9 +5,11 @@ import { Board } from "../../models";
 import { BoardGroup, BoardCard, ButtonAddBoard, BoardForm } from "./components";
 import { getBoards } from "../../services";
 
+export type Modals = "create" | "edit" | "delete" | "none";
+
 export const Boards = () => {
   const [boards, setBoards] = useState<Board[]>([]);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<Modals>("none");
   const { user } = useSessionContext();
 
   useEffect(() => {
@@ -39,15 +41,19 @@ export const Boards = () => {
     fetchBoards();
   }, [user?.id]);
 
-  const handleModal = () => {
-    setIsOpen(prevState => !prevState);
+  const handleModal = (newState: Modals) => {
+    setIsOpen(newState);
   };
 
-  const handleAddBoard = (newBoard: Board) => {
+  const handleAddBoard = (newBoard: Board, newState: Modals) => {
     const newBoards = [...boards, newBoard];
     setBoards(newBoards);
-    setIsOpen(prevState => !prevState);
+    setIsOpen(newState);
   };
+
+  if (!user) {
+    return;
+  }
 
   return (
     <main className="w-screen h-screen bg-background-primary p-10">
@@ -56,13 +62,13 @@ export const Boards = () => {
           <BoardCard
             key={board.id}
             id={board.id}
-            label={board.nombreUsuarioPropietario}
+            label={board.nombreUsuarioPropietario || user?.nombreDeUsuario}
             nombre={board.nombre}
             descripcion={board.descripcion}
           />)}
         <ButtonAddBoard onModal={handleModal} />
       </BoardGroup>
-      {isOpen &&
+      {isOpen === "create" &&
         <CustomModal onModal={handleModal}>
           <BoardForm onAddBoard={handleAddBoard} />
         </CustomModal>

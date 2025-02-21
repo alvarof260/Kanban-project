@@ -2,6 +2,7 @@ import { useState, ChangeEvent } from "react";
 import { useSessionContext } from "../../../../context/session.context";
 import { Board } from "../../../../models";
 import { InputForm } from "..";
+import { Modals } from "../../Boards";
 
 interface FormDataValues {
   idUsuarioPropietario: number;
@@ -16,7 +17,7 @@ const initialStateForm: FormDataValues = {
 };
 
 interface BoardFormProps {
-  onAddBoard: (newBoard: Board) => void;
+  onAddBoard: (newBoard: Board, newState: Modals) => void;
 }
 
 export const BoardForm = ({ onAddBoard }: BoardFormProps) => {
@@ -54,7 +55,7 @@ export const BoardForm = ({ onAddBoard }: BoardFormProps) => {
         return;
       }
 
-      onAddBoard(data.data);
+      onAddBoard(data.data, "none");
       setFormData(initialStateForm);
     } catch (err) {
       console.error("ERROR: ", err);

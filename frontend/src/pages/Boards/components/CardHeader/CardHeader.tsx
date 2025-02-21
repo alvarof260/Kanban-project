@@ -6,7 +6,7 @@ interface Props {
 
 export const CardHeader = ({ children }: Props) => {
   return (
-    <section className="flex flex-row w-full justify-between">
+    <section className="flex flex-row h-auto w-full justify-between">
       {children}
     </section>
   );

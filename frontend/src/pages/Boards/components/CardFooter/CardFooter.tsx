@@ -4,9 +4,10 @@ interface Props {
   children: ReactNode;
 }
 
-export const CardBody = ({ children }: Props) => {
+
+export const CardFooter = ({ children }: Props) => {
   return (
-    <section className="flex flex-col justify-between h-full">
+    <section className="flex flex-row justify-between items-center">
       {children}
     </section>
   );
