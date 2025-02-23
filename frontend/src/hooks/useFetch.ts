@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-type DataType<T> = T | null;
+type DataType<T> = T[];
 type ErrorType = TypeError | null;
 
 interface Params<T> {
@@ -13,19 +13,26 @@ interface Params<T> {
 interface ResponseFetch<T> {
   success: boolean;
   message: string;
-  data?: T;
+  data?: DataType<T>;
 }
 
-export const useFetch = <T>(fetchFunction: () => Promise<Response>): Params<T> => {
-  const [data, setData] = useState<DataType<T>>(null);
+export const useFetch = <T>(url: string): Params<T> => {
+  const [data, setData] = useState<DataType<T>>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<ErrorType>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+
+      const options: RequestInit = {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      };
+
       try {
-        const response = await fetchFunction();
+        const response = await fetch(url, options);
 
         if (!response.ok) {
           throw new Error('Error al conectar con el servidor.');
@@ -46,7 +53,7 @@ export const useFetch = <T>(fetchFunction: () => Promise<Response>): Params<T> =
       }
     };
     fetchData();
-  }, [fetchFunction]);
+  }, [url]);
 
   return { data, setData, loading, error };
 };

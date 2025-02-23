@@ -3,7 +3,7 @@ import { User } from "../models";
 import { useNavigate } from "react-router";
 
 interface SessionContextType {
-  user: User;
+  user: User | null;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -12,7 +12,11 @@ interface Props {
   children: ReactNode
 }
 
-const SessionContext = createContext<SessionContextType | undefined>(undefined);
+const SessionContext = createContext<SessionContextType>({
+  user: null,
+  login: () => { },
+  logout: () => { }
+});
 
 export const useSessionContext = () => {
   const context = useContext(SessionContext);
@@ -24,18 +28,11 @@ export const useSessionContext = () => {
   return context;
 };
 
-const initialStateUser: User = {
-  id: 0,
-  nombreDeUsuario: "",
-  password: "",
-  rolUsuario: 1
-};
-
 export const SessionProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<User>(() => {
+  const [user, setUser] = useState<User | null>(() => {
     try {
       const localStorageUser = localStorage.getItem("user");
-      return localStorageUser ? JSON.parse(localStorageUser) : initialStateUser;
+      return localStorageUser ? JSON.parse(localStorageUser) : null;
     } catch (error) {
       console.error("Error al parsear el usuario de localStorage:", error);
       return null;
@@ -50,7 +47,7 @@ export const SessionProvider = ({ children }: Props) => {
   };
 
   const logout = () => {
-    setUser(initialStateUser);
+    setUser(null);
     localStorage.removeItem('user');
     navigate("/");
   };

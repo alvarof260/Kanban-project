@@ -3,7 +3,6 @@ import { useSessionContext } from "../../../../contexts/session.context";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InputForm } from "../../../../components";
-import { loginUser } from "../../../../services";
 import { useState } from "react";
 
 interface ResponseFetch {
@@ -26,8 +25,15 @@ export const LoginForm = () => {
   const { login } = useSessionContext();
 
   const onSubmit: SubmitHandler<LoginValues> = async (formData: LoginValues) => {
+    const options: RequestInit = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+      credentials: "include",
+    };
+
     try {
-      const response = await loginUser(formData);
+      const response = await fetch("http://localhost:5093/api/login", options);
 
       const data: ResponseFetch = await response.json();
       if (!response.ok) {

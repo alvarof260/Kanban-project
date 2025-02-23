@@ -45,6 +45,7 @@ public class LoginController : ControllerBase
       }
 
       HttpContext.Session.SetString("IsAuthenticated", "true");
+      HttpContext.Session.SetInt32("id", usuario.Id);
       HttpContext.Session.SetString("nombre", usuario.NombreDeUsuario);
       HttpContext.Session.SetInt32("rol", Convert.ToInt32(usuario.RolUsuario));
       _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + " ingreso correctamente.");
