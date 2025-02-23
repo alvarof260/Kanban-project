@@ -1,44 +1,39 @@
-import { useState, ChangeEvent } from "react";
 import { useSessionContext } from "../../../../contexts/session.context";
 import { Board } from "../../../../models";
-import { InputForm } from "..";
 import { Modals } from "../../Boards";
+import { z } from "zod";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { InputForm } from "../../../../components";
 
-interface FormDataValues {
-  idUsuarioPropietario: number;
-  nombre: string;
-  descripcion: string;
-}
+export const CreateBoardSchema = z.object({
+  idUsuarioPropietario: z.number(),
+  nombre: z.string().min(1, "El nombre es obligatorio").max(100, "El nombre del tablero no debe exceder los 100 caracteres."),
+  descripcion: z.string().min(1, "El nombre es obligatorio").max(255, "La descripcion no debe exceder los 255 caracteres.")
+});
 
-const initialStateForm: FormDataValues = {
-  idUsuarioPropietario: 0,
-  nombre: "",
-  descripcion: ""
-};
+export type CreateBoardValues = z.infer<typeof CreateBoardSchema>
 
 interface BoardFormProps {
   onAddBoard: (newBoard: Board, newState: Modals) => void;
 }
 
 export const BoardForm = ({ onAddBoard }: BoardFormProps) => {
-  const [formData, setFormData] = useState<FormDataValues>(initialStateForm);
   const { user } = useSessionContext();
+  const { control, handleSubmit, formState: { errors } } = useForm<CreateBoardValues>({
+    resolver: zodResolver(CreateBoardSchema),
+    defaultValues: {
+      idUsuarioPropietario: user?.id,
+      nombre: "",
+      descripcion: ""
+    }
+  });
 
-  const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({ ...prevState, [name]: value }));
-  };
-
-  const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const dataToSend = { ...formData, idUsuarioPropietario: user?.id || 0 };
-
-    console.log(dataToSend);
-
+  const onSubmit: SubmitHandler<CreateBoardValues> = async (formData: CreateBoardValues) => {
     const options: RequestInit = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dataToSend),
+      body: JSON.stringify(formData),
       credentials: "include"
     };
 
@@ -56,18 +51,31 @@ export const BoardForm = ({ onAddBoard }: BoardFormProps) => {
       }
 
       onAddBoard(data.data, "none");
-      setFormData(initialStateForm);
     } catch (err) {
       console.error("ERROR: ", err);
     }
   };
 
   return (
-    <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit}>
-      <InputForm label="Nombre:" type="text" name="nombre" placeholder="nombre de tablero" value={formData.nombre} onChange={handleChangeInput} maxLength={50} />
-      <InputForm label="Descripcion:" type="text" name="descripcion" placeholder="descripcion de tablero" value={formData.descripcion} onChange={handleChangeInput} maxLength={255} />
+    <form className="flex flex-col justify-center w-full gap-2" onSubmit={handleSubmit(onSubmit)}>
+      <InputForm
+        name="nombre"
+        label="nombre"
+        control={control}
+        type="text"
+        placeholder="ingrese el nombre del tablero"
+        error={errors.nombre}
+      />
+      <InputForm
+        name="descripcion"
+        label="descripcion"
+        control={control}
+        type="text"
+        placeholder="ingrese la descripcion del tablero"
+        error={errors.descripcion}
+      />
       <button
-        className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300 mt-12"
+        className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"
       >
         Enviar
       </button>

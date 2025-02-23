@@ -77,6 +77,12 @@ export const Boards = () => {
           <BoardForm onAddBoard={handleAddBoard} />
         </CustomModal>
       }
+      {
+        isOpen === "edit" &&
+        <CustomModal onModal={handleModal}>
+          <BoardForm onAddBoard={handleAddBoard} />
+        </CustomModal>
+      }
     </main >
   );
 };
