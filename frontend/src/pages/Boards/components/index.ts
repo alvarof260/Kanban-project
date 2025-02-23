@@ -6,3 +6,4 @@ export * from "./BoardsGroup/BoardsGroup";
 export * from "./CardHeader/CardHeader";
 export * from "./CardBody/CardBody";
 export * from "./CardActions/CardActions";
+export * from "./BoardUpdateForm/BoardUpdateForm";

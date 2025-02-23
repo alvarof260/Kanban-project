@@ -4,9 +4,10 @@ import { EllipsisHorizontal } from "../../../../icons";
 interface Props {
   idBoard: number;
   onDeleteBoard: (idBoard: number) => void;
+  onUpdateBoard: (idBoard: number) => void;
 }
 
-export const CardActions = ({ idBoard, onDeleteBoard }: Props) => {
+export const CardActions = ({ idBoard, onDeleteBoard, onUpdateBoard }: Props) => {
   const [actions, setActions] = useState<boolean>(false);
   const actionsRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,7 +44,15 @@ export const CardActions = ({ idBoard, onDeleteBoard }: Props) => {
             <span className="text-text-light font-medium text-sm px-2 py-1.5">Actions</span>
           </section>
           <section className="flex flex-col justify-start items-start gap-1 w-full">
-            <button className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start">Editar tablero</button>
+            <button
+              className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start"
+              onClick={() => {
+                setActions(!actions);
+                onUpdateBoard(idBoard);
+              }}
+            >
+              Editar tablero
+            </button>
             <button
               className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start"
               onClick={() => onDeleteBoard(idBoard)}

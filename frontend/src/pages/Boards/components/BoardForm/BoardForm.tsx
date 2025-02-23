@@ -41,7 +41,7 @@ export const BoardForm = ({ onAddBoard }: BoardFormProps) => {
       const response = await fetch("http://localhost:5093/api/Tablero", options);
 
       if (!response.ok) {
-        throw new Error('Error al conectar con el serivdor.');
+        throw new Error('Error al conectar con el servidor.');
       }
 
       const data: { success: boolean, data: Board } = await response.json();

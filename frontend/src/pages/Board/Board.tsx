@@ -118,7 +118,7 @@ export const Board = () => {
         </CustomModal>
       }
       {
-        (isCreating && idBoard) &&
+        isCreating &&
         <CustomModal onModal={() => setIsCreating(!isCreating)}>
           <FormTaskCreate state={stateSelected} idBoard={Number(idBoard)} onAddTask={handleCreateTask} />
         </CustomModal>

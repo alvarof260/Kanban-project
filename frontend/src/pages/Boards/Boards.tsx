@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSessionContext } from "../../contexts/session.context";
 import { CustomModal } from "../../components";
 import { Board } from "../../models";
-import { BoardGroup, BoardCard, ButtonAddBoard, BoardForm, CardActions, CardBody, CardHeader } from "./components";
+import { BoardGroup, BoardCard, ButtonAddBoard, BoardForm, CardActions, CardBody, CardHeader, BoardUpdateForm, BoardUpdateValues } from "./components";
 import { useFetch } from "../../hooks";
 import { Link } from "react-router";
 import { CardFooter } from "./components/CardFooter/CardFooter";
@@ -13,6 +13,7 @@ export const Boards = () => {
   const { user } = useSessionContext();
   const { data: boards, setData: setBoards } = useFetch<Board>(`http://localhost:5093/api/Tablero/${user?.id}`);
   const [isOpen, setIsOpen] = useState<Modals>("none");
+  const [idSelected, setIdSelected] = useState<number>(0);
 
   const handleModal = (newState: Modals) => {
     setIsOpen(newState);
@@ -45,6 +46,22 @@ export const Boards = () => {
     }
   };
 
+  const handleUpdateBoard = (updatedBoard: BoardUpdateValues, idBoard: number) => {
+    const newBoards = boards.map((board) => {
+      if (board.id === idBoard) {
+        return {
+          ...board,
+          nombre: updatedBoard.nombre !== "" ? updatedBoard.nombre : board.nombre,
+          descripcion: updatedBoard.descripcion !== "" ? updatedBoard.descripcion : board.descripcion
+        };
+      } else {
+        return board;
+      }
+    });
+    setBoards(newBoards);
+    setIsOpen("none");
+  };
+
   if (!user) {
     return;
   }
@@ -58,7 +75,10 @@ export const Boards = () => {
               <Link to={`/board/${board.id}`} className="cursor-pointer">
                 <h2 className="text-2xl font-semibold text-text-light hover:underline">{board.nombre}</h2>
               </Link >
-              <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} />
+              <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} onUpdateBoard={(idBoard: number) => {
+                setIsOpen("edit");
+                setIdSelected(idBoard);
+              }} />
             </CardHeader >
             <CardBody>
               <section className="overflow-hidden">
@@ -80,7 +100,7 @@ export const Boards = () => {
       {
         isOpen === "edit" &&
         <CustomModal onModal={handleModal}>
-          <BoardForm onAddBoard={handleAddBoard} />
+          <BoardUpdateForm idBoard={idSelected} onUpdateBoard={handleUpdateBoard} />
         </CustomModal>
       }
     </main >
