@@ -4,6 +4,7 @@ namespace Kanban.ViewModels;
 
 public class GetUsuariosViewModel
 {
-  public string Usuario { get; set; }
+  public int Id { get; set; }
+  public string NombreDeUsuario { get; set; }
   public RolUsuario RolUsuario { get; set; }
 }

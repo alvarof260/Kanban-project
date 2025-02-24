@@ -154,12 +154,12 @@ public class TareaRepository : ITareaRepository
         {
           tareas.Add(new GetTareasViewModel
           {
-            IdTarea = reader.GetInt32(1),
-            Nombre = reader.GetString(2),
-            Estado = (EstadoTarea)reader.GetInt32(3),
-            Descripcion = reader.GetString(4),
-            Color = reader.GetString(5),
-            IdUsuarioAsignado = reader.GetInt32(6)
+            Id = reader.GetInt32(0),
+            Nombre = reader.GetString(1),
+            Estado = (EstadoTarea)reader.GetInt32(2),
+            Descripcion = reader.GetString(3),
+            Color = reader.GetString(4),
+            IdUsuarioAsignado = reader.GetInt32(5)
           });
         }
       }
@@ -190,7 +190,7 @@ public class TareaRepository : ITareaRepository
         {
           tareas.Add(new GetTareasViewModel
           {
-            IdTarea = reader.GetInt32(0),
+            Id = reader.GetInt32(0),
             Nombre = reader.GetString(1),
             Estado = (EstadoTarea)reader.GetInt32(2),
             Descripcion = reader.GetString(3),

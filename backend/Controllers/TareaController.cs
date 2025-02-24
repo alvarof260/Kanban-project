@@ -115,6 +115,30 @@ public class TareaController : ControllerBase
     }
   }
 
+  [HttpPut("asignar/{idTarea}")]
+  public IActionResult AssignTarea(int idTarea, UpdateAssignTareaViewModel model)
+  {
+    try
+    {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+      _tareaRepository.AssignTarea(model.IdUsuarioAsignado, idTarea);
+
+      return Ok(new { success = true, message = "Tarea modificada con éxito." });
+    }
+    catch (KeyNotFoundException ex)
+    {
+      _logger.LogWarning(ex.ToString(), "Al actualizar tarea.");
+      return BadRequest(new { success = false, message = ex });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex.ToString(), "Error al actualizar tarea.");
+      return StatusCode(500, new { success = false, message = "Ocurrió un error interno en el servidor." });
+    }
+  }
+
   [HttpDelete("{id}")]
   public IActionResult Eliminar(int id)
   {

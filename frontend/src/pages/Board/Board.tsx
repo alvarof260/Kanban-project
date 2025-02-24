@@ -3,15 +3,18 @@ import { useParams } from "react-router";
 import { CustomModal } from "../../components";
 import { ESTADOS } from "../../constants";
 import { Task } from "../../models";
-import { ColumnTask, TitleColumn, GroupTask, TaskCard, FormTask, FormTaskCreate } from "./components";
+import { ColumnTask, TitleColumn, GroupTask, TaskCard, FormTask, FormTaskCreate, TaskUpdateValues } from "./components";
+import { AssignTaskForm, AssignTaskValues } from "./components/AssignTaskForm/AssignTaskForm";
 
 export const Board = () => {
   const { idBoard } = useParams();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [stateSelected, setStateSelected] = useState<number>(0);
-  const [idSelected, setIdSelected] = useState<number>(0);
-  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<"create" | "edit" | "assign" | "delete" | "none">("none");
+  const [infoActions, setInfoActions] = useState<{ estado: number, id: number, idUsuarioAsignado: number }>({
+    estado: 0,
+    id: 0,
+    idUsuarioAsignado: 0
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +47,8 @@ export const Board = () => {
     fetchData();
   }, [idBoard]);
 
+  console.log(tasks);
+
   const handleDeleteTask = async (id: number) => {
     const options: RequestInit = {
       method: "DELETE",
@@ -57,7 +62,7 @@ export const Board = () => {
         throw new Error('Error al conectar con el servidor.');
       }
 
-      const newTasks = tasks.filter((task) => task.idTarea !== id);
+      const newTasks = tasks.filter((task) => task.id !== id);
 
       setTasks(newTasks);
     } catch (err) {
@@ -65,20 +70,40 @@ export const Board = () => {
     }
   };
 
-  const handleUpdateTask = (newState: number, id: number) => {
-    setTasks(tasks.map((task) =>
-      task.idTarea === id ? { ...task, estado: newState } : task
-    ));
-    setIsEditing(!isEditing);
+  const handleUpdateTask = (newState: TaskUpdateValues, id: number) => {
+    setTasks(tasks.map((task) => {
+      if (task.id === id) {
+        return {
+          ...task,
+          nombre: newState.nombre !== "" ? newState.nombre : task.nombre,
+          descripcion: newState.descripcion !== "" ? newState.descripcion : task.descripcion,
+          color: newState.color !== "" ? newState.color : task.color,
+          estado: newState.estado !== task.estado ? newState.estado : task.estado
+        };
+      } else {
+        return task;
+      }
+    }));
+    setIsOpen("none");
   };
 
   const handleOpenModalCreate = (state: number) => {
-    setIsCreating(!isCreating);
-    setStateSelected(state);
+    setIsOpen("create");
+    const newState = { ...infoActions, estado: state };
+    setInfoActions(newState);
   };
 
   const handleCreateTask = (newTask: Task) => {
     setTasks([...tasks, newTask]);
+  };
+
+  const handleAssignTask = (newState: AssignTaskValues, id: number) => {
+    const newTasks = tasks.map((task) =>
+      task.id === id
+        ? { ...task, idUsuarioAsignado: newState.idUsuarioAsignado }
+        : task);
+    setTasks(newTasks);
+    setIsOpen("none");
   };
 
   return (
@@ -93,16 +118,22 @@ export const Board = () => {
                   .filter((task) => task.estado === Number(estado))
                   .map((task) => (
                     <TaskCard
-                      key={task.idTarea}
+                      key={task.id}
                       nombre={task.nombre}
-                      id={task.idTarea}
+                      id={task.id}
                       state={task.estado}
+                      color={task.color}
+                      idUsuarioAsignado={task.idUsuarioAsignado}
                       onDeleteTask={handleDeleteTask}
                       onChangeState={(state: number, id: number) => {
-                        setIsEditing(!isEditing);
-                        console.log(state);
-                        setStateSelected(state);
-                        setIdSelected(id);
+                        setIsOpen("edit");
+                        const newState = { ...infoActions, id, estado: state };
+                        setInfoActions(newState);
+                      }}
+                      onAssignTask={(id: number, idUsuarioAsignado: number) => {
+                        setIsOpen("assign");
+                        const newState = { ...infoActions, idUsuarioAsignado, id };
+                        setInfoActions(newState);
                       }}
                     />
                   ))}
@@ -112,15 +143,21 @@ export const Board = () => {
         </section>
       </main>
       {
-        isEditing &&
-        <CustomModal onModal={() => setIsEditing(!isEditing)}>
-          <FormTask stateInitial={stateSelected} idTask={idSelected} onUpdateTask={handleUpdateTask} />
+        isOpen === "edit" &&
+        <CustomModal onModal={() => setIsOpen("none")}>
+          <FormTask stateInitial={infoActions.estado} idTask={infoActions.id} onUpdateTask={handleUpdateTask} />
         </CustomModal>
       }
       {
-        isCreating &&
-        <CustomModal onModal={() => setIsCreating(!isCreating)}>
-          <FormTaskCreate state={stateSelected} idBoard={Number(idBoard)} onAddTask={handleCreateTask} />
+        isOpen === "create" &&
+        <CustomModal onModal={() => setIsOpen("none")}>
+          <FormTaskCreate state={infoActions.estado} onAddTask={handleCreateTask} />
+        </CustomModal>
+      }
+      {
+        isOpen === "assign" &&
+        <CustomModal onModal={() => setIsOpen("none")}>
+          <AssignTaskForm idUsuarioAsignado={infoActions.idUsuarioAsignado} idTask={infoActions.id} onAssignTask={handleAssignTask} />
         </CustomModal>
       }
     </>

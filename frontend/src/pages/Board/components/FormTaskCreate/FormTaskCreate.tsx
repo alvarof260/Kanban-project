@@ -1,43 +1,49 @@
-import { useState, ChangeEvent } from "react";
 import { Task } from "../../../../models";
-
-interface FormTaskCreateValues {
-  nombre: string;
-  descripcion: string;
-  color: string;
-  estado: number;
-}
-const initialState: FormTaskCreateValues = {
-  nombre: "",
-  descripcion: "",
-  color: "",
-  estado: 0
-};
+import { z } from "zod";
+import { useParams } from "react-router";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { InputForm } from "../../../../components";
 
 interface FormTaskCreateProps {
   state: number;
-  idBoard: number;
   onAddTask: (newTask: Task) => void;
 }
 
-export const FormTaskCreate = ({ state, idBoard, onAddTask }: FormTaskCreateProps) => {
-  const [formData, setFormData] = useState<FormTaskCreateValues>(initialState);
+export const TaskCreateSchema = z.object({
+  nombre: z.string().min(1, "El nombre de la tarea es obligatorio").max(100, "El nombre de tarea no debe exceder los 100 caracteres."),
+  descripcion: z.string().min(1, "La descripcion de la tarea es obligatorio").max(255, "La descripcion no debe exceder los 255 caracteres."),
+  color: z.string().max(30, "El color de la tarea no debe exceder los 30 caracteres"),
+  estado: z.number().gte(1).lte(5)
+});
 
-  const onChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({ ...prevState, [name]: value }));
-  };
+export type TaskCreateValues = z.infer<typeof TaskCreateSchema>
 
-  const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const dataToSend = { ...formData, estado: state };
+export const color: Record<number, string> = {
+  1: "border-gray-200",
+  2: "border-blue-300",
+  3: "border-yellow-300",
+  4: "border-purple-300",
+  5: "border-green-300"
+};
 
-    console.log(dataToSend);
+export const FormTaskCreate = ({ state, onAddTask }: FormTaskCreateProps) => {
+  const { control, handleSubmit, formState: { errors } } = useForm<TaskCreateValues>({
+    resolver: zodResolver(TaskCreateSchema),
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+      color: color[state],
+      estado: state
+    }
+  });
+  const { idBoard } = useParams();
 
+  const onSubmit: SubmitHandler<TaskCreateValues> = async (formData: TaskCreateValues) => {
     const options: RequestInit = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dataToSend),
+      body: JSON.stringify(formData),
       credentials: "include"
     };
 
@@ -57,21 +63,34 @@ export const FormTaskCreate = ({ state, idBoard, onAddTask }: FormTaskCreateProp
       console.log(data.data);
 
       onAddTask(data.data);
-      setFormData(initialState);
     } catch (err) {
       console.error("ERROR: ", err);
     }
   };
 
   return (
-    <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit}>
-      <label className="text-gray-50" htmlFor="nombre">Nombre</label>
-      <input className="text-gray-50" type="text" name="nombre" id="nombre" placeholder="ingrese un nombre" value={formData.nombre} onChange={onChangeInput} required maxLength={50} />
-      <label className="text-gray-50" htmlFor="descripcion">Descripcion</label>
-      <input className="text-gray-50" type="text" name="descripcion" id="descripcion" placeholder="ingrese una descripcion" value={formData.descripcion} onChange={onChangeInput} required maxLength={255} />
-      <label className="text-gray-50" htmlFor="color">Color</label>
-      <input className="text-gray-50" type="text" name="color" id="color" placeholder="ingrese un color" value={formData.color} onChange={onChangeInput} required />
-      <button className="bg-green-500 py-2 rounded-xs">Enviar</button>
+    <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
+      <InputForm
+        name="nombre"
+        label="nombre"
+        control={control}
+        type="text"
+        placeholder="ingrese el nombre de la tarea"
+        error={errors.nombre}
+      />
+      <InputForm
+        name="descripcion"
+        label="descripcion"
+        control={control}
+        type="text"
+        placeholder="ingrese la descripcion de la tarea"
+        error={errors.descripcion}
+      />
+      <button
+        className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"
+      >
+        Enviar
+      </button>
     </form>
   );
 };

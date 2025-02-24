@@ -14,6 +14,6 @@ public class CreateTareaViewModel
   [Required]
   [StringLength(255, ErrorMessage = "La descripcion no debe exceder los 255 caracteres.")]
   public string Descripcion { get; set; }
-  [StringLength(7, ErrorMessage = "El color debe estar en formato hexadecimal")]
+  [StringLength(30, ErrorMessage = "El color no debe exceder los 30 caracteres.")]
   public string? Color { get; set; }
 }

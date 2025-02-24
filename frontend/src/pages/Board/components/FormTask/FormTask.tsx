@@ -1,23 +1,38 @@
-import { useState, ChangeEvent } from "react";
 import { ESTADOS } from "../../../../constants";
+import { z } from "zod";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { color } from "../FormTaskCreate/FormTaskCreate";
+import { InputForm } from "../../../../components";
 
 interface FormTaskProps {
   stateInitial: number;
   idTask: number;
-  onUpdateTask: (newState: number, id: number) => void;
+  onUpdateTask: (newState: TaskUpdateValues, id: number) => void;
 }
 
-interface FormDataValues {
-  estado: number;
-}
+export const TaskUpdateSchema = z.object({
+  nombre: z.string().max(100, "El nombre de tarea no debe exceder los 100 caracteres."),
+  descripcion: z.string().max(255, "La descripcion no debe exceder los 255 caracteres."),
+  color: z.string().max(30, "El color de la tarea no debe exceder los 30 caracteres"),
+  estado: z.number().gte(1).lte(5)
+});
+
+export type TaskUpdateValues = z.infer<typeof TaskUpdateSchema>
 
 export const FormTask = ({ stateInitial, idTask, onUpdateTask }: FormTaskProps) => {
-  const [formData, setFormData] = useState<FormDataValues>({ estado: stateInitial });
+  const { control, handleSubmit, formState: { errors } } = useForm<TaskUpdateValues>({
+    resolver: zodResolver(TaskUpdateSchema),
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+      color: color[stateInitial],
+      estado: stateInitial
+    }
+  });
 
-  const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    console.log(formData);
+  const onSubmit: SubmitHandler<TaskUpdateValues> = async (formData: TaskUpdateValues) => {
+    formData.color = color[formData.estado];
 
     const options: RequestInit = {
       method: "PUT",
@@ -40,25 +55,50 @@ export const FormTask = ({ stateInitial, idTask, onUpdateTask }: FormTaskProps) 
       }
 
 
-      onUpdateTask(formData.estado, idTask);
+      onUpdateTask(formData, idTask);
     } catch (err) {
       console.error("ERROR: ", err);
     }
   };
 
   return (
-    <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit}>
-      <label htmlFor="estado">Estado</label>
-      <select
-        id="estado"
-        name="estado"
-        value={formData.estado}
-        onChange={(e) => setFormData(prevState => ({ ...prevState, [e.target.name]: Number(e.target.value) }))}
+    <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
+      <InputForm
+        name="nombre"
+        label="nombre"
+        control={control}
+        type="text"
+        placeholder="ingrese el nombre de la tarea"
+        error={errors.nombre}
+      />
+      <InputForm
+        name="descripcion"
+        label="descripcion"
+        control={control}
+        type="text"
+        placeholder="ingrese la descripcion de la tarea"
+        error={errors.descripcion}
+      />
+      <section className="flex flex-col justify-start gap-2 h-28 w-full">
+        <label className="text-sm font-medium text-text-light" htmlFor="estado">Estado</label>
+        <Controller
+          name="estado"
+          control={control}
+          render={({ field }) => (
+            <select {...field} onChange={(e) => field.onChange(Number(e.target.value))} className="border border-accent-dark/30 bg-transparent rounded-md px-3 py-2 text-sm text-text-muted outline-none focus:border-accent-light">
+              {Object.entries(ESTADOS).map(([key, nombre]) => (
+                <option className="bg-background-primary" key={key} value={Number(key)}>{nombre}</option>
+              ))}
+            </select>
+          )}
+        />
+        {errors.estado && <p className="text-xs font-medium text-red-500/70 mt-2">{errors.estado.message}</p>}
+      </section>
+      <button
+        className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"
       >
-        {Object.entries(ESTADOS).map(([key, nombre]) =>
-          <option key={key} value={key}>{nombre}</option>)}
-      </select>
-      <button className="bg-green-500 py-2 rounded-xs">Enviar</button>
+        Enviar
+      </button>
     </form>
   );
 };

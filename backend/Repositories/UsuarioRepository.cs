@@ -88,7 +88,7 @@ public class UsuarioRepository : IUsuarioRepository
   {
     List<GetUsuariosViewModel> usuarios = new List<GetUsuariosViewModel>();
 
-    string query = @"SELECT nombre_de_usuario, rol_usuario 
+    string query = @"SELECT id, nombre_de_usuario, rol_usuario 
                      FROM Usuario;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -103,8 +103,9 @@ public class UsuarioRepository : IUsuarioRepository
         {
           usuarios.Add(new GetUsuariosViewModel
           {
-            Usuario = reader.GetString(0),
-            RolUsuario = (RolUsuario)reader.GetInt32(1)
+            Id = reader.GetInt32(0),
+            NombreDeUsuario = reader.GetString(1),
+            RolUsuario = (RolUsuario)reader.GetInt32(2)
           });
         }
       }
