@@ -5,7 +5,7 @@ namespace Kanban.Interfaces;
 
 public interface ITareaRepository
 {
-  public Tarea CreateTarea(int id, CreateTareaViewModel tarea);
+  public GetTareasViewModel CreateTarea(int id, CreateTareaViewModel tarea);
   public void UpdateTarea(int id, UpdateTareaViewModel tarea);
   public Tarea GetTareaById(int id);
   public List<GetTareasViewModel> GetTareaByIdUsuario(int idUsuario);

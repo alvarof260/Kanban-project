@@ -11,10 +11,11 @@ export const Board = () => {
   const { idBoard } = useParams();
   const { data: tasks, setData: setTasks } = useFetch<Task>(`http://localhost:5093/api/Tarea/Tablero/${idBoard}`);
   const [isOpen, setIsOpen] = useState<"create" | "edit" | "assign" | "delete" | "none">("none");
-  const [infoActions, setInfoActions] = useState<{ estado: number, id: number, idUsuarioAsignado: number }>({
+  const [infoActions, setInfoActions] = useState<{ estado: number, id: number, idUsuarioAsignado: number, nombreUsuarioAsignado: string }>({
     estado: 0,
     id: 0,
-    idUsuarioAsignado: 0
+    idUsuarioAsignado: 0,
+    nombreUsuarioAsignado: ""
   });
 
   console.log(tasks);
@@ -70,7 +71,7 @@ export const Board = () => {
   const handleAssignTask = (newState: AssignTaskValues, id: number) => {
     const newTasks = tasks.map((task) =>
       task.id === id
-        ? { ...task, idUsuarioAsignado: newState.idUsuarioAsignado }
+        ? { ...task, idUsuarioAsignado: newState.idUsuarioAsignado, nombreUsuarioAsignado: newState.nombreUsuarioAsignado }
         : task);
     setTasks(newTasks);
     setIsOpen("none");
@@ -95,15 +96,16 @@ export const Board = () => {
                             idTask={task.id}
                             idUsuarioAsignado={task.idUsuarioAsignado}
                             state={task.estado}
+                            nombreUsuarioAsignado={task.nombreUsuarioAsignado}
                             onDeleteTask={handleDeleteTask}
                             onUpdateTask={(state: number, id: number) => {
                               setIsOpen("edit");
                               const newState = { ...infoActions, id, estado: state };
                               setInfoActions(newState);
                             }}
-                            onAssignTask={(id: number, idUsuarioAsignado: number) => {
+                            onAssignTask={(id: number, idUsuarioAsignado: number, nombreUsuarioAsignado: string) => {
                               setIsOpen("assign");
-                              const newState = { ...infoActions, idUsuarioAsignado, id };
+                              const newState = { ...infoActions, idUsuarioAsignado, id, nombreUsuarioAsignado };
                               setInfoActions(newState);
                             }}
                           />
@@ -113,7 +115,7 @@ export const Board = () => {
                         </CardBody>
                       </section>
                       <CardFooter>
-                        <span className="text-xs font-normal text-primary-medium">{task.idUsuarioAsignado}</span>
+                        <span className="text-xs font-normal text-primary-medium">{task.nombreUsuarioAsignado !== "" ? `Tarea asignada: ${task.nombreUsuarioAsignado}` : "Tarea no asignada"}</span>
                         <span className={`rounded-full w-4 h-4 ${task.color}`}></span>
                       </CardFooter>
                     </TaskCard>
@@ -138,7 +140,7 @@ export const Board = () => {
       {
         isOpen === "assign" &&
         <CustomModal onModal={() => setIsOpen("none")}>
-          <AssignTaskForm idUsuarioAsignado={infoActions.idUsuarioAsignado} idTask={infoActions.id} onAssignTask={handleAssignTask} />
+          <AssignTaskForm idUsuarioAsignado={infoActions.idUsuarioAsignado} nombreUsuarioAsignado={infoActions.nombreUsuarioAsignado} idTask={infoActions.id} onAssignTask={handleAssignTask} />
         </CustomModal>
       }
     </>

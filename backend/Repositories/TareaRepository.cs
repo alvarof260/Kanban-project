@@ -15,9 +15,9 @@ public class TareaRepository : ITareaRepository
     this._connectionString = connectionString;
   }
 
-  public Tarea CreateTarea(int id, CreateTareaViewModel tarea)
+  public GetTareasViewModel CreateTarea(int id, CreateTareaViewModel tarea)
   {
-    Tarea nuevaTarea = null;
+    GetTareasViewModel nuevaTarea = null;
 
     string query = @"INSERT INTO Tarea 
                      (id_tablero, nombre, estado, descripcion, color, id_usuario_asignado)
@@ -39,15 +39,15 @@ public class TareaRepository : ITareaRepository
 
       int idGenerado = Convert.ToInt32(command.ExecuteScalar());
 
-      nuevaTarea = new Tarea
+      nuevaTarea = new GetTareasViewModel
       {
         Id = idGenerado,
-        IdTablero = id,
         Nombre = tarea.Nombre,
         Estado = tarea.Estado,
         Descripcion = tarea.Descripcion,
         Color = tarea.Color,
-        IdUsuarioAsignado = 0
+        IdUsuarioAsignado = 0,
+        NombreUsuarioAsignado = ""
       };
 
       connection.Close();
@@ -137,8 +137,8 @@ public class TareaRepository : ITareaRepository
   {
     List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
 
-    string query = @"SELECT id, nombre, estado, descripcion, color, id_usuario_asignado, u.nombre_de_usuario
-                     FROM Tarea 
+    string query = @"SELECT t.id, t.nombre, t.estado, t.descripcion, t.color, t.id_usuario_asignado, u.nombre_de_usuario
+                     FROM Tarea t
                      LEFT JOIN Usuario u ON t.id_usuario_asignado = u.id
                      WHERE id_usuario_asignado = @Id;";
 
@@ -161,7 +161,7 @@ public class TareaRepository : ITareaRepository
             Descripcion = reader.GetString(3),
             Color = reader.GetString(4),
             IdUsuarioAsignado = reader.GetInt32(5),
-            NombreUsuarioAsignado = reader.IsDBNull(6) ? null : reader.GetString(6)
+            NombreUsuarioAsignado = reader.IsDBNull(6) ? "" : reader.GetString(6)
           });
         }
       }
@@ -176,12 +176,12 @@ public class TareaRepository : ITareaRepository
     List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
 
     string query = @"SELECT 
-                      id, 
-                      nombre, 
-                      estado, 
-                      descripcion, 
-                      color, 
-                      id_usuario_asignado, 
+                      t.id, 
+                      t.nombre, 
+                      t.estado, 
+                      t.descripcion, 
+                      t.color, 
+                      t.id_usuario_asignado, 
                       COALESCE(u.nombre_de_usuario, '') AS nombre_de_usuario_asignado
                      FROM Tarea t
                      LEFT JOIN Usuario u ON t.id_usuario_asignado = u.id

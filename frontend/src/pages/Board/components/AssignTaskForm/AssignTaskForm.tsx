@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -6,30 +7,30 @@ import { User } from "../../../../models";
 
 interface Props {
   idUsuarioAsignado: number;
+  nombreUsuarioAsignado: string;
   idTask: number;
   onAssignTask: (newState: AssignTaskValues, id: number) => void;
 }
 
-export const AssignTaskSchema = z.object(({
-  idUsuarioAsignado: z.number()
-}));
+export const AssignTaskSchema = z.object({
+  idUsuarioAsignado: z.number(),
+  nombreUsuarioAsignado: z.string()
+});
 
-export type AssignTaskValues = z.infer<typeof AssignTaskSchema>
+export type AssignTaskValues = z.infer<typeof AssignTaskSchema>;
 
-export const AssignTaskForm = ({ idUsuarioAsignado, idTask, onAssignTask }: Props) => {
-  const { control, handleSubmit, formState: { errors } } = useForm<AssignTaskValues>({
+export const AssignTaskForm = ({ idUsuarioAsignado, nombreUsuarioAsignado, idTask, onAssignTask }: Props) => {
+  const { control, handleSubmit, setValue, formState: { errors } } = useForm<AssignTaskValues>({
     resolver: zodResolver(AssignTaskSchema),
     defaultValues: {
-      idUsuarioAsignado: idUsuarioAsignado
+      idUsuarioAsignado: idUsuarioAsignado,
+      nombreUsuarioAsignado: nombreUsuarioAsignado
     }
   });
 
   const { data: users } = useFetch<User>("http://localhost:5093/api/usuario");
-  console.log(users);
 
   const onSubmit: SubmitHandler<AssignTaskValues> = async (formData: AssignTaskValues) => {
-
-    console.log(formData);
     const options: RequestInit = {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -50,10 +51,16 @@ export const AssignTaskForm = ({ idUsuarioAsignado, idTask, onAssignTask }: Prop
         return;
       }
 
-
       onAssignTask(formData, idTask);
     } catch (err) {
       console.error("ERROR: ", err);
+    }
+  };
+
+  const handleUserChange = (userId: number) => {
+    const selectedUser = users.find(user => user.id === userId);
+    if (selectedUser) {
+      setValue("nombreUsuarioAsignado", selectedUser.nombreDeUsuario);
     }
   };
 
@@ -68,7 +75,11 @@ export const AssignTaskForm = ({ idUsuarioAsignado, idTask, onAssignTask }: Prop
           render={({ field }) => (
             <select
               {...field}
-              onChange={(e) => field.onChange(Number(e.target.value))}
+              onChange={(e) => {
+                const userId = Number(e.target.value);
+                field.onChange(userId);
+                handleUserChange(userId); // Actualizar el nombre de usuario
+              }}
               value={field.value || ""}
               className="border border-accent-dark/30 bg-transparent rounded-md px-3 py-2 text-sm text-text-muted outline-none focus:border-accent-light"
             >

@@ -72,7 +72,7 @@ public class TareaController : ControllerBase
           errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
         });
 
-      Tarea nuevaTarea = _tareaRepository.CreateTarea(id, tarea);
+      GetTareasViewModel nuevaTarea = _tareaRepository.CreateTarea(id, tarea);
 
       return Created("api/Usuario", new { success = true, data = nuevaTarea });
     }
