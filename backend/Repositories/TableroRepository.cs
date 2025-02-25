@@ -180,15 +180,16 @@ public class TableroRepository : ITableroRepository
   {
     List<GetTablerosViewModel> tablerosBuscado = new List<GetTablerosViewModel>();
 
-    string query = @"SELECT DISTINCT t.id, 
-                            COALESCE(u_t.nombre_de_usuario,u_p.nombre_de_usuario) AS nombre_de_usuario, 
-                            t.nombre, 
-                            t.descripcion   
-                     FROM Tablero t                                                       
-                     LEFT JOIN Tarea ta ON t.id = ta.id_tablero                         
-                     LEFT JOIN Usuario u_t ON ta.id_usuario_asignado = u_t.id
-                     LEFT JOIN Usuario u_p ON t.id_usuario_propietario = u_p.id                
-                     WHERE t.id_usuario_propietario = 2 OR ta.id_usuario_asignado = 2;";
+    string query = @"SELECT t.id, 
+       u_p.nombre_de_usuario AS nombre_de_usuario,
+       t.nombre, 
+       t.descripcion
+FROM Tablero t                                                       
+LEFT JOIN Tarea ta ON t.id = ta.id_tablero                         
+LEFT JOIN Usuario u_t ON ta.id_usuario_asignado = u_t.id
+LEFT JOIN Usuario u_p ON t.id_usuario_propietario = u_p.id                
+WHERE t.id_usuario_propietario = @Id OR ta.id_usuario_asignado = @Id
+GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {

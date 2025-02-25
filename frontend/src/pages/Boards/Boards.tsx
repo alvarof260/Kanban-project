@@ -20,7 +20,7 @@ export const Boards = () => {
   };
 
   const handleAddBoard = (newBoard: Board, newState: Modals) => {
-    const newBoards = [...boards, newBoard];
+    const newBoards = [...boards, { ...newBoard, nombreUsuarioPropietario: user ? user?.nombreDeUsuario : "" }];
     setBoards(newBoards);
     setIsOpen(newState);
   };
@@ -61,6 +61,8 @@ export const Boards = () => {
     setBoards(newBoards);
     setIsOpen("none");
   };
+
+  console.log(boards);
 
   if (!user) {
     return;

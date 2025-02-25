@@ -9,7 +9,7 @@ export const ButtonAddBoard = ({ onModal }: ButtonAddBoardProps) => {
   return (
     <div className="relative flex justify-center">
       <button
-        className="bg-transparent rounded-md border border-accent-dark/30 p-6 min-w-86 h-50 text-text-light flex justify-center items-center font-medium text-2xl cursor-pointer hover:bg-background-tertiary/70 relative group"
+        className="bg-transparent rounded-md border border-accent-dark/30 p-6 min-w-86 h-60 text-text-light flex justify-center items-center font-medium text-2xl cursor-pointer hover:bg-background-tertiary/70 relative group"
         onClick={() => onModal("create")}
       >
         <Plus />
