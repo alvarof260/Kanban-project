@@ -8,6 +8,7 @@ import { InputForm } from "../../../../components";
 interface FormTaskProps {
   stateInitial: number;
   idTask: number;
+  isOwnerBoard: boolean;
   onUpdateTask: (newState: TaskUpdateValues, id: number) => void;
 }
 
@@ -20,7 +21,7 @@ export const TaskUpdateSchema = z.object({
 
 export type TaskUpdateValues = z.infer<typeof TaskUpdateSchema>
 
-export const FormTask = ({ stateInitial, idTask, onUpdateTask }: FormTaskProps) => {
+export const FormTask = ({ stateInitial, idTask, isOwnerBoard, onUpdateTask }: FormTaskProps) => {
   const { control, handleSubmit, formState: { errors } } = useForm<TaskUpdateValues>({
     resolver: zodResolver(TaskUpdateSchema),
     defaultValues: {
@@ -63,22 +64,27 @@ export const FormTask = ({ stateInitial, idTask, onUpdateTask }: FormTaskProps) 
 
   return (
     <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <InputForm
-        name="nombre"
-        label="nombre"
-        control={control}
-        type="text"
-        placeholder="ingrese el nombre de la tarea"
-        error={errors.nombre}
-      />
-      <InputForm
-        name="descripcion"
-        label="descripcion"
-        control={control}
-        type="text"
-        placeholder="ingrese la descripcion de la tarea"
-        error={errors.descripcion}
-      />
+      {
+        isOwnerBoard &&
+        <>
+          <InputForm
+            name="nombre"
+            label="nombre"
+            control={control}
+            type="text"
+            placeholder="ingrese el nombre de la tarea"
+            error={errors.nombre}
+          />
+          <InputForm
+            name="descripcion"
+            label="descripcion"
+            control={control}
+            type="text"
+            placeholder="ingrese la descripcion de la tarea"
+            error={errors.descripcion}
+          />
+        </>
+      }
       <section className="flex flex-col justify-start gap-2 h-28 w-full">
         <label className="text-sm font-medium text-text-light" htmlFor="estado">Estado</label>
         <Controller

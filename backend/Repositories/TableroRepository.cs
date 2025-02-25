@@ -103,13 +103,14 @@ public class TableroRepository : ITableroRepository
     }
   }
 
-  public Tablero GetTableroId(int id)
+  public GetTablerosViewModel GetTableroId(int id)
   {
-    Tablero tableroBuscado = null;
+    GetTablerosViewModel tableroBuscado = null;
 
-    string query = @"SELECT * 
-                     FROM Tablero 
-                     WHERE id = @Id";
+    string query = @"SELECT t.id, u.nombre_de_usuario, t.nombre, t.descripcion 
+                     FROM Tablero t 
+                     LEFT JOIN Usuario u ON t.id_usuario_propietario = u.id
+                     WHERE t.id = @Id;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
@@ -117,14 +118,16 @@ public class TableroRepository : ITableroRepository
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
+      command.Parameters.AddWithValue("@Id", id);
+
       using (SqliteDataReader reader = command.ExecuteReader())
       {
         if (reader.Read())
         {
-          tableroBuscado = new Tablero
+          tableroBuscado = new GetTablerosViewModel
           {
             Id = reader.GetInt32(0),
-            IdUsuarioPropietario = reader.GetInt32(1),
+            NombreUsuarioPropietario = reader.GetString(1),
             Nombre = reader.GetString(2),
             Descripcion = reader.GetString(3)
           };

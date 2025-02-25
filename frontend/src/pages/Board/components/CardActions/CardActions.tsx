@@ -6,12 +6,13 @@ interface Props {
   idUsuarioAsignado: number;
   state: number;
   nombreUsuarioAsignado: string;
+  isOwnerBoard: boolean;
   onDeleteTask: (id: number) => void;
   onUpdateTask: (state: number, id: number) => void;
   onAssignTask: (id: number, idUsuarioAsignado: number, nombreUsuarioAsignado: string) => void;
 }
 
-export const CardActions = ({ idTask, idUsuarioAsignado, state, nombreUsuarioAsignado, onDeleteTask, onUpdateTask, onAssignTask }: Props) => {
+export const CardActions = ({ idTask, idUsuarioAsignado, state, nombreUsuarioAsignado, isOwnerBoard, onDeleteTask, onUpdateTask, onAssignTask }: Props) => {
   const [actions, setActions] = useState<boolean>(false);
   const actionsRef = useRef<HTMLDivElement | null>(null);
 
@@ -57,21 +58,26 @@ export const CardActions = ({ idTask, idUsuarioAsignado, state, nombreUsuarioAsi
             >
               Editar Tarea
             </button>
-            <button
-              className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start"
-              onClick={() => onDeleteTask(idTask)}
-            >
-              Eliminar Tarea
-            </button>
-            <button
-              className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start"
-              onClick={() => {
-                setActions(!actions);
-                onAssignTask(idTask, idUsuarioAsignado, nombreUsuarioAsignado);
-              }}
-            >
-              Asignar Tarea
-            </button>
+            {
+              isOwnerBoard &&
+              <>
+                <button
+                  className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start"
+                  onClick={() => onDeleteTask(idTask)}
+                >
+                  Eliminar Tarea
+                </button>
+                <button
+                  className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start"
+                  onClick={() => {
+                    setActions(!actions);
+                    onAssignTask(idTask, idUsuarioAsignado, nombreUsuarioAsignado);
+                  }}
+                >
+                  Asignar Tarea
+                </button>
+              </>
+            }
           </section>
         </article>
       }

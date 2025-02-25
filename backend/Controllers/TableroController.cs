@@ -37,6 +37,25 @@ public class TableroController : ControllerBase
     }
   }
 
+  [HttpGet("tablero/{id}")]
+  public IActionResult GetTableroIdBoard(int id)
+  {
+    try
+    {
+      if (string.IsNullOrEmpty(HttpContext.Session.GetString("nombre")))
+        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+
+      GetTablerosViewModel tablero = _tableroRepository.GetTableroId(id);
+
+      return Ok(new { success = true, data = tablero });
+    }
+    catch (System.Exception)
+    {
+
+      throw;
+    }
+  }
+
   [HttpGet("{id}")]
   public IActionResult GetTablerosByIdUsuario(int id)
   {

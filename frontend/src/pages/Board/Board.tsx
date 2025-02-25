@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { CardBody, CardFooter, CardHeader, CustomModal } from "../../components";
 import { ESTADOS } from "../../constants";
-import { Task } from "../../models";
+import { Task, Board } from "../../models";
 import { ColumnTask, TitleColumn, GroupTask, TaskCard, FormTask, FormTaskCreate, TaskUpdateValues, CardActions } from "./components";
 import { AssignTaskForm, AssignTaskValues } from "./components/AssignTaskForm/AssignTaskForm";
 import { useFetch } from "../../hooks";
+import { useSessionContext } from "../../contexts/session.context";
 
-export const Board = () => {
+export const BoardKanban = () => {
   const { idBoard } = useParams();
+  const { user } = useSessionContext();
   const { data: tasks, setData: setTasks } = useFetch<Task>(`http://localhost:5093/api/Tarea/Tablero/${idBoard}`);
   const [isOpen, setIsOpen] = useState<"create" | "edit" | "assign" | "delete" | "none">("none");
   const [infoActions, setInfoActions] = useState<{ estado: number, id: number, idUsuarioAsignado: number, nombreUsuarioAsignado: string }>({
@@ -17,6 +19,36 @@ export const Board = () => {
     idUsuarioAsignado: 0,
     nombreUsuarioAsignado: ""
   });
+  const [board, setBoard] = useState<Board | null>(null);
+
+
+  useEffect(() => {
+    const fetchBoard = async () => {
+      const options: RequestInit = {
+        method: "GET",
+        headers: { "Content-Type": "applications/json" },
+        credentials: "include"
+      };
+      try {
+        const response = await fetch(`http://localhost:5093/api/Tablero/tablero/${idBoard}`, options);
+
+        if (!response.ok) {
+          throw new Error("Error al conectar con el servidor.");
+        }
+
+        const data: { success: boolean, data: Board } = await response.json();
+
+        if (!data.success) {
+          return;
+        }
+
+        setBoard(data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchBoard();
+  }, [idBoard]);
 
   console.log(tasks);
 
@@ -77,6 +109,8 @@ export const Board = () => {
     setIsOpen("none");
   };
 
+  const isOwnerBoard = board?.nombreUsuarioPropietario === user?.nombreDeUsuario;
+
   return (
     <>
       <main className="w-screen h-screen bg-background-primary p-10">
@@ -84,7 +118,7 @@ export const Board = () => {
           {Object.entries(ESTADOS).map(([estado, nombre]) => (
             <ColumnTask key={estado}>
               <TitleColumn name={nombre} tasks={tasks.filter(task => task.estado === Number(estado))} />
-              <GroupTask onOpenModal={() => handleOpenModalCreate(Number(estado))}>
+              <GroupTask isOwnerBoard={isOwnerBoard} onOpenModal={() => handleOpenModalCreate(Number(estado))}>
                 {tasks
                   .filter((task) => task.estado === Number(estado))
                   .map((task) => (
@@ -92,23 +126,27 @@ export const Board = () => {
                       <section>
                         <CardHeader>
                           <h2 className="text-base font semibold text-text-light">{task.nombre}</h2>
-                          <CardActions
-                            idTask={task.id}
-                            idUsuarioAsignado={task.idUsuarioAsignado}
-                            state={task.estado}
-                            nombreUsuarioAsignado={task.nombreUsuarioAsignado}
-                            onDeleteTask={handleDeleteTask}
-                            onUpdateTask={(state: number, id: number) => {
-                              setIsOpen("edit");
-                              const newState = { ...infoActions, id, estado: state };
-                              setInfoActions(newState);
-                            }}
-                            onAssignTask={(id: number, idUsuarioAsignado: number, nombreUsuarioAsignado: string) => {
-                              setIsOpen("assign");
-                              const newState = { ...infoActions, idUsuarioAsignado, id, nombreUsuarioAsignado };
-                              setInfoActions(newState);
-                            }}
-                          />
+                          {
+                            (isOwnerBoard || user?.id === task.idUsuarioAsignado) &&
+                            <CardActions
+                              idTask={task.id}
+                              idUsuarioAsignado={task.idUsuarioAsignado}
+                              state={task.estado}
+                              nombreUsuarioAsignado={task.nombreUsuarioAsignado}
+                              isOwnerBoard={isOwnerBoard}
+                              onDeleteTask={handleDeleteTask}
+                              onUpdateTask={(state: number, id: number) => {
+                                setIsOpen("edit");
+                                const newState = { ...infoActions, id, estado: state };
+                                setInfoActions(newState);
+                              }}
+                              onAssignTask={(id: number, idUsuarioAsignado: number, nombreUsuarioAsignado: string) => {
+                                setIsOpen("assign");
+                                const newState = { ...infoActions, idUsuarioAsignado, id, nombreUsuarioAsignado };
+                                setInfoActions(newState);
+                              }}
+                            />
+                          }
                         </CardHeader>
                         <CardBody>
                           <p className="text-sm font-normal text-text-muted">{task.descripcion}</p>
@@ -128,7 +166,7 @@ export const Board = () => {
       {
         isOpen === "edit" &&
         <CustomModal onModal={() => setIsOpen("none")}>
-          <FormTask stateInitial={infoActions.estado} idTask={infoActions.id} onUpdateTask={handleUpdateTask} />
+          <FormTask stateInitial={infoActions.estado} idTask={infoActions.id} isOwnerBoard={isOwnerBoard} onUpdateTask={handleUpdateTask} />
         </CustomModal>
       }
       {
