@@ -1,51 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router";
-import { CustomModal } from "../../components";
+import { CardBody, CardFooter, CardHeader, CustomModal } from "../../components";
 import { ESTADOS } from "../../constants";
 import { Task } from "../../models";
-import { ColumnTask, TitleColumn, GroupTask, TaskCard, FormTask, FormTaskCreate, TaskUpdateValues } from "./components";
+import { ColumnTask, TitleColumn, GroupTask, TaskCard, FormTask, FormTaskCreate, TaskUpdateValues, CardActions } from "./components";
 import { AssignTaskForm, AssignTaskValues } from "./components/AssignTaskForm/AssignTaskForm";
+import { useFetch } from "../../hooks";
 
 export const Board = () => {
   const { idBoard } = useParams();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { data: tasks, setData: setTasks } = useFetch<Task>(`http://localhost:5093/api/Tarea/Tablero/${idBoard}`);
   const [isOpen, setIsOpen] = useState<"create" | "edit" | "assign" | "delete" | "none">("none");
   const [infoActions, setInfoActions] = useState<{ estado: number, id: number, idUsuarioAsignado: number }>({
     estado: 0,
     id: 0,
     idUsuarioAsignado: 0
   });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const options: RequestInit = {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include"
-      };
-
-      try {
-        const response = await fetch(`http://localhost:5093/api/Tarea/Tablero/${idBoard}`, options);
-
-        if (!response.ok) {
-          throw new Error('Error al conectar con el servidor.');
-        }
-
-        const data: { success: boolean, data: Task[] } = await response.json();
-
-        if (!data.success) {
-          return;
-        }
-
-        console.log(data.data);
-
-        setTasks(data.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchData();
-  }, [idBoard]);
 
   console.log(tasks);
 
@@ -108,34 +78,45 @@ export const Board = () => {
 
   return (
     <>
-      <main className="w-screen h-screen bg-gray-100 p-10">
-        <section className="flex flex-row w-full h-full">
+      <main className="w-screen h-screen bg-background-primary p-10">
+        <section className="flex flex-row w-full h-full gap-2">
           {Object.entries(ESTADOS).map(([estado, nombre]) => (
             <ColumnTask key={estado}>
-              <TitleColumn name={nombre} />
+              <TitleColumn name={nombre} tasks={tasks.filter(task => task.estado === Number(estado))} />
               <GroupTask onOpenModal={() => handleOpenModalCreate(Number(estado))}>
                 {tasks
                   .filter((task) => task.estado === Number(estado))
                   .map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      nombre={task.nombre}
-                      id={task.id}
-                      state={task.estado}
-                      color={task.color}
-                      idUsuarioAsignado={task.idUsuarioAsignado}
-                      onDeleteTask={handleDeleteTask}
-                      onChangeState={(state: number, id: number) => {
-                        setIsOpen("edit");
-                        const newState = { ...infoActions, id, estado: state };
-                        setInfoActions(newState);
-                      }}
-                      onAssignTask={(id: number, idUsuarioAsignado: number) => {
-                        setIsOpen("assign");
-                        const newState = { ...infoActions, idUsuarioAsignado, id };
-                        setInfoActions(newState);
-                      }}
-                    />
+                    <TaskCard>
+                      <section>
+                        <CardHeader>
+                          <h2 className="text-base font semibold text-text-light">{task.nombre}</h2>
+                          <CardActions
+                            idTask={task.id}
+                            idUsuarioAsignado={task.idUsuarioAsignado}
+                            state={task.estado}
+                            onDeleteTask={handleDeleteTask}
+                            onUpdateTask={(state: number, id: number) => {
+                              setIsOpen("edit");
+                              const newState = { ...infoActions, id, estado: state };
+                              setInfoActions(newState);
+                            }}
+                            onAssignTask={(id: number, idUsuarioAsignado: number) => {
+                              setIsOpen("assign");
+                              const newState = { ...infoActions, idUsuarioAsignado, id };
+                              setInfoActions(newState);
+                            }}
+                          />
+                        </CardHeader>
+                        <CardBody>
+                          <p className="text-sm font-normal text-text-muted">{task.descripcion}</p>
+                        </CardBody>
+                      </section>
+                      <CardFooter>
+                        <span className="text-xs font-normal text-primary-medium">{task.idUsuarioAsignado}</span>
+                        <span className={`rounded-full w-4 h-4 ${task.color}`}></span>
+                      </CardFooter>
+                    </TaskCard>
                   ))}
               </GroupTask>
             </ColumnTask>

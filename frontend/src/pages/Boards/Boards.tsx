@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useSessionContext } from "../../contexts/session.context";
-import { CustomModal } from "../../components";
+import { CardBody, CardFooter, CardHeader, CustomModal } from "../../components";
 import { Board } from "../../models";
-import { BoardGroup, BoardCard, ButtonAddBoard, BoardForm, CardActions, CardBody, CardHeader, BoardUpdateForm, BoardUpdateValues } from "./components";
+import { BoardGroup, BoardCard, ButtonAddBoard, BoardForm, BoardUpdateForm, BoardUpdateValues, CardActions } from "./components";
 import { useFetch } from "../../hooks";
 import { Link } from "react-router";
-import { CardFooter } from "./components/CardFooter/CardFooter";
 
 export type Modals = "create" | "edit" | "delete" | "none";
 
@@ -73,20 +72,22 @@ export const Boards = () => {
       <BoardGroup>
         {boards.map((board) =>
           <BoardCard key={board.id}>
-            <CardHeader>
-              <Link to={`/board/${board.id}`} className="cursor-pointer">
-                <h2 className="text-2xl font-semibold text-text-light hover:underline">{board.nombre}</h2>
-              </Link >
-              <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} onUpdateBoard={(idBoard: number) => {
-                setIsOpen("edit");
-                setIdSelected(idBoard);
-              }} />
-            </CardHeader >
-            <CardBody>
-              <section className="overflow-hidden">
-                <p className={"text-base font-normal text-text-muted"}>{board.descripcion}</p>
-              </section>
-            </CardBody>
+            <section>
+              <CardHeader>
+                <Link to={`/board/${board.id}`} className="cursor-pointer">
+                  <h2 className="text-2xl font-semibold text-text-light hover:underline">{board.nombre}</h2>
+                </Link >
+                <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} onUpdateBoard={(idBoard: number) => {
+                  setIsOpen("edit");
+                  setIdSelected(idBoard);
+                }} />
+              </CardHeader >
+              <CardBody>
+                <section className="overflow-hidden">
+                  <p className={"text-base font-normal text-text-muted"}>{board.descripcion}</p>
+                </section>
+              </CardBody>
+            </section>
             <CardFooter>
               <span className="text-xs font-normal text-primary-medium">Creado por {board.nombreUsuarioPropietario}</span>
             </CardFooter>

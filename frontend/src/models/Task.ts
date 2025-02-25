@@ -6,4 +6,5 @@ export interface Task {
   descripcion: string;
   color: string;
   idUsuarioAsignado: number;
+  nombreUsuarioAsignado: string;
 }

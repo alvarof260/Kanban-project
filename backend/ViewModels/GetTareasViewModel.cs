@@ -9,5 +9,6 @@ public class GetTareasViewModel
   public EstadoTarea Estado { get; set; }
   public string Descripcion { get; set; }
   public string Color { get; set; }
-  public int? IdUsuarioAsignado { get; set; }
+  public int IdUsuarioAsignado { get; set; }
+  public string NombreUsuarioAsignado { get; set; } = "";
 }

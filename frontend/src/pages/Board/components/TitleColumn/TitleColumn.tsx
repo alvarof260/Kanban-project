@@ -1,11 +1,16 @@
+import { Task } from "../../../../models";
 
 interface TitleColumnProps {
   name: string;
+  tasks: Task[]
 }
 
-export const TitleColumn = ({ name }: TitleColumnProps) => {
+export const TitleColumn = ({ name, tasks }: TitleColumnProps) => {
   return (
-    <h3 className="bg-gray-300  py-2 font-bold text-center text-red-500">{name}</h3>
+    <header className="flex flex-row justify-between items-center">
+      <h3 className="text-text-light font-medium text-base">{name}</h3>
+      <span className="text-text-light text-sm bg-background-tertiary rounded-full w-6 h-6 flex justify-center items-center">{tasks.length}</span>
+    </header>
   );
 };
 

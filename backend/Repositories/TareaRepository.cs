@@ -137,8 +137,9 @@ public class TareaRepository : ITareaRepository
   {
     List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
 
-    string query = @"SELECT id, nombre, estado, descripcion, color, id_usuario_asignado 
+    string query = @"SELECT id, nombre, estado, descripcion, color, id_usuario_asignado, u.nombre_de_usuario
                      FROM Tarea 
+                     LEFT JOIN Usuario u ON t.id_usuario_asignado = u.id
                      WHERE id_usuario_asignado = @Id;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -159,7 +160,8 @@ public class TareaRepository : ITareaRepository
             Estado = (EstadoTarea)reader.GetInt32(2),
             Descripcion = reader.GetString(3),
             Color = reader.GetString(4),
-            IdUsuarioAsignado = reader.GetInt32(5)
+            IdUsuarioAsignado = reader.GetInt32(5),
+            NombreUsuarioAsignado = reader.IsDBNull(6) ? null : reader.GetString(6)
           });
         }
       }
@@ -173,8 +175,16 @@ public class TareaRepository : ITareaRepository
   {
     List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
 
-    string query = @"SELECT id, nombre, estado, descripcion, color, id_usuario_asignado
-                     FROM Tarea 
+    string query = @"SELECT 
+                      id, 
+                      nombre, 
+                      estado, 
+                      descripcion, 
+                      color, 
+                      id_usuario_asignado, 
+                      COALESCE(u.nombre_de_usuario, '') AS nombre_de_usuario_asignado
+                     FROM Tarea t
+                     LEFT JOIN Usuario u ON t.id_usuario_asignado = u.id
                      WHERE id_tablero = @Id;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -195,7 +205,8 @@ public class TareaRepository : ITareaRepository
             Estado = (EstadoTarea)reader.GetInt32(2),
             Descripcion = reader.GetString(3),
             Color = reader.GetString(4),
-            IdUsuarioAsignado = reader.GetInt32(5)
+            IdUsuarioAsignado = reader.GetInt32(5),
+            NombreUsuarioAsignado = reader.IsDBNull(6) ? "" : reader.GetString(6)
           });
         }
       }

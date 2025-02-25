@@ -20,11 +20,11 @@ export const TaskCreateSchema = z.object({
 export type TaskCreateValues = z.infer<typeof TaskCreateSchema>
 
 export const color: Record<number, string> = {
-  1: "border-gray-200",
-  2: "border-blue-300",
-  3: "border-yellow-300",
-  4: "border-purple-300",
-  5: "border-green-300"
+  1: "bg-gray-200",
+  2: "bg-blue-300",
+  3: "bg-yellow-300",
+  4: "bg-purple-300",
+  5: "bg-green-300"
 };
 
 export const FormTaskCreate = ({ state, onAddTask }: FormTaskCreateProps) => {
