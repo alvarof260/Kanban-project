@@ -63,6 +63,7 @@ export const Boards = () => {
 
   console.log(boards);
 
+
   if (!user) {
     return;
   }
@@ -77,10 +78,13 @@ export const Boards = () => {
                 <Link to={`/board/${board.id}`} className="cursor-pointer">
                   <h2 className="text-2xl font-semibold text-text-light hover:underline">{board.nombre}</h2>
                 </Link >
-                <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} onUpdateBoard={(idBoard: number) => {
-                  setIsOpen("edit");
-                  setIdSelected(idBoard);
-                }} />
+                {
+                  user.nombreDeUsuario === board.nombreUsuarioPropietario &&
+                  <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} onUpdateBoard={(idBoard: number) => {
+                    setIsOpen("edit");
+                    setIdSelected(idBoard);
+                  }} />
+                }
               </CardHeader >
               <CardBody>
                 <section className="overflow-hidden">
