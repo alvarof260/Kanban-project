@@ -2,18 +2,35 @@ import { useState } from "react";
 import { useFetch } from "../../hooks";
 import { User } from "../../models";
 import { CustomModal } from "../../components";
-import { CreateUserForm } from "./components";
+import { CreateUserForm, UpdateUserForm } from "./components";
 
 export const Dashboard = () => {
   const { data: users, setData: setUsers } = useFetch<User>("http://localhost:5093/api/Usuario");
+  const [idSelected, setIdSelected] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<"none" | "create" | "edit">("none");
+
+  console.log(users);
 
   const handleOpenCreate = () => {
     setIsOpen("create");
   };
 
+  const handleOpenEdit = (id: number) => {
+    console.log(id);
+    setIdSelected(id);
+    setIsOpen("edit");
+  };
+
   const handleAddUser = (newUser: User) => {
     setUsers([...users, newUser]);
+    setIsOpen("none");
+  };
+
+  const handleUpdateUser = (updatedUser: User, id: number) => {
+    const newUsers = users.map((user) =>
+      user.id === id ? updatedUser : user
+    );
+    setUsers(newUsers);
     setIsOpen("none");
   };
 
@@ -36,11 +53,14 @@ export const Dashboard = () => {
             <tbody>
               {
                 users.map((user) => (
-                  <tr className="border-b border-b-accent-dark/30 hover:bg-background-tertiary/50 transition ease-in duration-300">
+                  <tr key={user.id} className="border-b border-b-accent-dark/30 hover:bg-background-tertiary/50 transition ease-in duration-300">
                     <td className="align-middle p-2 text-text-light font-medium">{user.nombreDeUsuario}</td>
-                    <td className="align-middle p-2 text-text-light font-medium">{user.rolUsuario === 1 ? "Administrador" : "Operante"}</td>
+                    <td className="align-middle p-2 text-text-light font-medium">{user.rolUsuario === 1 ? "Administrador" : "Operador"}</td>
                     <td className="align-middle text-right p-2">
-                      <button className="bg-accent-light py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300">Cambiar Rol</button>
+                      <button
+                        className="bg-accent-light py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"
+                        onClick={() => handleOpenEdit(user.id)}
+                      >Cambiar Rol</button>
                     </td>
                   </tr>
                 ))
@@ -59,6 +79,12 @@ export const Dashboard = () => {
         isOpen === "create" &&
         <CustomModal onModal={() => setIsOpen("none")}>
           <CreateUserForm onAddUser={handleAddUser} />
+        </CustomModal>
+      }
+      {
+        isOpen === "edit" &&
+        <CustomModal onModal={() => setIsOpen("none")}>
+          <UpdateUserForm userSelected={users.find(user => user.id === idSelected)!} onUpdateUser={handleUpdateUser} />
         </CustomModal>
       }
     </>
