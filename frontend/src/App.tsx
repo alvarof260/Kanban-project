@@ -1,8 +1,8 @@
 import { BrowserRouter, Route } from "react-router";
 import { SessionProvider } from "./contexts/session.context";
-import { BoardKanban, Boards, Login } from "./pages";
+import { BoardKanban, Boards, Dashboard, Login } from "./pages";
 import { Routes } from "react-router";
-import { PrivateGuard } from "./guards/PrivateGuard";
+import { AdminGuard, PrivateGuard } from "./guards";
 
 function App() {
   return (
@@ -13,6 +13,9 @@ function App() {
           <Route element={<PrivateGuard />}>
             <Route path="/boards" element={<Boards />} />
             <Route path="/board/:idBoard" element={<BoardKanban />} />
+            <Route element={<AdminGuard />} >
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Route>
           </Route>
         </Routes>
       </SessionProvider>
