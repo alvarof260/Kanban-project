@@ -4,8 +4,8 @@ import { useSessionContext } from "../../contexts/session.context";
 export const Header = () => {
   const { user, logout } = useSessionContext();
 
-  const isAdmin = user?.rolUsuario === 1;
-  const role = user?.rolUsuario === 1 ? "Administrador" : "Operador";
+  const isAdmin = user?.roleUser === 1;
+  const role = user?.roleUser === 1 ? "Administrador" : "Operador";
 
   return (
     <header className="bg-background-primary border-b border-b-accent-dark/30 border-dashed flex flex-row justify-between items-center p-4">
@@ -24,11 +24,11 @@ export const Header = () => {
 
       <section className="text-sm flex flex-row items-center gap-4">
         <section className="text-right">
-          <h3 className="text-text-light font-medium">{user?.nombreDeUsuario}</h3>
+          <h3 className="text-text-light font-medium">{user?.username}</h3>
           <h4 className="text-primary-light font-medium">{role}</h4>
         </section>
         <section className={`w-10 h-10 rounded-full text-text-light text-xl font-bold ${isAdmin ? "bg-blue-600" : "bg-green-600"} flex justify-center items-center `}>
-          {user?.nombreDeUsuario[0].toUpperCase()}
+          {user?.username[0].toUpperCase()}
         </section>
       </section>
     </header>

@@ -6,23 +6,23 @@ using Microsoft.Data.Sqlite;
 
 namespace Kanban.Repositories;
 
-public class UsuarioRepository : IUsuarioRepository
+public class UserRepository : IUserRepository
 {
   private readonly string _connectionString;
 
-  public UsuarioRepository(string connectionString)
+  public UserRepository(string connectionString)
   {
     this._connectionString = connectionString;
   }
 
-  public Usuario CreateUsuario(CreateUsuarioViewModel usuario)
+  public User CreateUser(CreateUserViewModel user)
   {
-    Usuario nuevoUsuario = null;
+    User newUser = null;
 
     string query = @"INSERT INTO Usuario 
                      (nombre_de_usuario, password, rol_usuario) 
                      VALUES (@NombreDeUsuario, @Password, @RolUsuario);
-                     SELECT last_insert_rowid();"; // obtener el id del ultimo usuario creado
+                     SELECT last_insert_rowid();";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
@@ -30,27 +30,27 @@ public class UsuarioRepository : IUsuarioRepository
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@NombreDeUsuario", usuario.Usuario);
-      command.Parameters.AddWithValue("@Password", usuario.Password);
-      command.Parameters.AddWithValue("@RolUsuario", usuario.RolUsuario);
+      command.Parameters.AddWithValue("@NombreDeUsuario", user.Username);
+      command.Parameters.AddWithValue("@Password", user.Password);
+      command.Parameters.AddWithValue("@RolUsuario", user.RoleUser);
 
-      int idGenerado = Convert.ToInt32(command.ExecuteScalar());
+      int id = Convert.ToInt32(command.ExecuteScalar());
 
-      nuevoUsuario = new Usuario
+      newUser = new User
       {
-        Id = idGenerado,
-        NombreDeUsuario = usuario.Usuario,
-        Password = usuario.Password,
-        RolUsuario = (RolUsuario)usuario.RolUsuario
+        Id = id,
+        Username = user.Username,
+        Password = user.Password,
+        RoleUser = (RoleUser)user.RoleUser
       };
 
       connection.Close();
     }
 
-    return nuevoUsuario;
+    return newUser;
   }
 
-  public void UpdateUsuario(int id, UpdateUsuarioViewModel usuario)
+  public void UpdateUser(int id, UpdateUserViewModel user)
   {
     string query = @"UPDATE Usuario 
                      SET 
@@ -67,15 +67,15 @@ public class UsuarioRepository : IUsuarioRepository
       command.Parameters.AddWithValue("@Id", id);
 
       command.Parameters.AddWithValue("@NombreDeUsuario",
-          string.IsNullOrEmpty(usuario.Usuario) ? DBNull.Value : usuario.Usuario);
+          string.IsNullOrEmpty(user.Username) ? DBNull.Value : user.Username);
       command.Parameters.AddWithValue("@Password",
-          string.IsNullOrEmpty(usuario.Password) ? DBNull.Value : usuario.Password);
+          string.IsNullOrEmpty(user.Password) ? DBNull.Value : user.Password);
       command.Parameters.AddWithValue("@RolUsuario",
-          usuario.RolUsuario.HasValue ? usuario.RolUsuario : DBNull.Value);
+          user.RoleUser.HasValue ? user.RoleUser : DBNull.Value);
 
-      int usuarioUpdated = command.ExecuteNonQuery();
+      int UpdatedUser = command.ExecuteNonQuery();
 
-      if (usuarioUpdated == 0)
+      if (UpdatedUser == 0)
       {
         throw new KeyNotFoundException($"No se encontro el usuario con ID: {id}.");
       }
@@ -84,11 +84,14 @@ public class UsuarioRepository : IUsuarioRepository
     }
   }
 
-  public List<GetUsuariosViewModel> GetUsuarios()
+  public List<GetUserViewModel> GetUsers()
   {
-    List<GetUsuariosViewModel> usuarios = new List<GetUsuariosViewModel>();
+    List<GetUserViewModel> users = new List<GetUserViewModel>();
 
-    string query = @"SELECT id, nombre_de_usuario, rol_usuario 
+    string query = @"SELECT 
+                     id,
+                     nombre_de_usuario,
+                     rol_usuario
                      FROM Usuario;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -101,23 +104,23 @@ public class UsuarioRepository : IUsuarioRepository
       {
         while (reader.Read())
         {
-          usuarios.Add(new GetUsuariosViewModel
+          users.Add(new GetUserViewModel
           {
             Id = reader.GetInt32(0),
-            NombreDeUsuario = reader.GetString(1),
-            RolUsuario = (RolUsuario)reader.GetInt32(2)
+            Username = reader.GetString(1),
+            RoleUser = (RoleUser)reader.GetInt32(2)
           });
         }
       }
       connection.Close();
     }
 
-    return usuarios;
+    return users;
   }
 
-  public Usuario GetUsuarioId(int id)
+  public User GetUserId(int id)
   {
-    Usuario usuarioBuscado = null;
+    User userFound = null;
 
     string query = @"SELECT * 
                      FROM Usuario 
@@ -134,12 +137,12 @@ public class UsuarioRepository : IUsuarioRepository
       {
         if (reader.Read())
         {
-          usuarioBuscado = new Usuario
+          userFound = new User
           {
             Id = reader.GetInt32(0),
-            NombreDeUsuario = reader.GetString(1),
+            Username = reader.GetString(1),
             Password = reader.GetString(2),
-            RolUsuario = (RolUsuario)reader.GetInt32(3)
+            RoleUser = (RoleUser)reader.GetInt32(3)
           };
         }
       }
@@ -147,18 +150,17 @@ public class UsuarioRepository : IUsuarioRepository
       connection.Close();
     }
 
-    if (usuarioBuscado == null)
+    if (userFound == null)
     {
       throw new KeyNotFoundException($"No se encontro el usuario con ID: {id}.");
     }
 
-    return usuarioBuscado;
+    return userFound;
   }
 
-  // TODO: debo cambiar nombre, ver logica y lanzar errores
-  public Usuario GetUsuarioNombre(string nombre)
+  public User GetUserLogin(string username)
   {
-    Usuario usuarioBuscado = null;
+    User userFound = null;
 
     string query = @"SELECT * FROM 
                      Usuario 
@@ -170,17 +172,17 @@ public class UsuarioRepository : IUsuarioRepository
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@NombreDeUsuario", nombre);
+      command.Parameters.AddWithValue("@NombreDeUsuario", username);
       using (SqliteDataReader reader = command.ExecuteReader())
       {
         if (reader.Read())
         {
-          usuarioBuscado = new Usuario
+          userFound = new User
           {
             Id = reader.GetInt32(0),
-            NombreDeUsuario = reader.GetString(1),
+            Username = reader.GetString(1),
             Password = reader.GetString(2),
-            RolUsuario = (RolUsuario)reader.GetInt32(3)
+            RoleUser = (RoleUser)reader.GetInt32(3)
           };
         }
       }
@@ -188,18 +190,17 @@ public class UsuarioRepository : IUsuarioRepository
       connection.Close();
     }
 
-    if (usuarioBuscado == null)
+    if (userFound == null)
     {
-      throw new KeyNotFoundException($"No se encontro el usuario con nombre: {nombre}.");
+      throw new KeyNotFoundException($"No se encontro el usuario con nombre: {username}.");
     }
 
-    return usuarioBuscado;
+    return userFound;
   }
 
-
-  public void DeleteUsuario(int id)
+  public void DeleteUser(int id)
   {
-    if (!Verificar(id))
+    if (!UserHasTasksOrBoards(id))
     {
       throw new InvalidOperationException("El usuario está asociado a tableros o tareas y no puede ser eliminado.");
     }
@@ -214,9 +215,9 @@ public class UsuarioRepository : IUsuarioRepository
 
       command.Parameters.AddWithValue("@Id", id);
 
-      int filasAfectadas = command.ExecuteNonQuery();
+      int rowsAffected = command.ExecuteNonQuery();
 
-      if (filasAfectadas == 0)
+      if (rowsAffected == 0)
       {
         throw new KeyNotFoundException($"No se encontro el usuario con ID: {id}.");
       }
@@ -225,7 +226,7 @@ public class UsuarioRepository : IUsuarioRepository
     }
   }
 
-  public void ChangePassword(int id, Usuario usuario)
+  public void ChangePassword(int id, User user)
   {
     string query = @"UPDATE Usuario 
                      SET password = @Password 
@@ -238,22 +239,22 @@ public class UsuarioRepository : IUsuarioRepository
       SqliteCommand command = new SqliteCommand(query, connection);
 
       command.Parameters.AddWithValue("@Id", id);
-      command.Parameters.AddWithValue("@Password", usuario.Password);
+      command.Parameters.AddWithValue("@Password", user.Password);
 
-      int usuarioUpdated = command.ExecuteNonQuery();
+      int rowsAffected = command.ExecuteNonQuery();
 
-      if (usuarioUpdated == 0)
+      if (rowsAffected == 0)
       {
-        throw new KeyNotFoundException("No se encontro el usuario con id: {id}");
+        throw new KeyNotFoundException($"No se encontro el usuario con id: {id}");
       }
 
       connection.Close();
     }
   }
 
-  private bool Verificar(int id)
+  private bool UserHasTasksOrBoards(int id)
   {
-    int contador;
+    int count;
 
     string query = @"SELECT COUNT(*)
                      FROM Usuario u
@@ -269,11 +270,11 @@ public class UsuarioRepository : IUsuarioRepository
 
       command.Parameters.AddWithValue("@Id", id);
 
-      contador = Convert.ToInt32(command.ExecuteScalar());
+      count = Convert.ToInt32(command.ExecuteScalar());
 
       connection.Close();
     }
 
-    return contador == 0; // El usuario no tiene tareas o tableros
+    return count == 0; // El usuario no tiene tareas o tableros
   }
 }

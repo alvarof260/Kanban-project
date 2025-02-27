@@ -5,7 +5,7 @@ import { CustomModal } from "../../components";
 import { CreateUserForm, UpdateUserForm } from "./components";
 
 export const Dashboard = () => {
-  const { data: users, setData: setUsers } = useFetch<User>("http://localhost:5093/api/Usuario");
+  const { data: users, setData: setUsers } = useFetch<User>("http://localhost:5093/api/User");
   const [idSelected, setIdSelected] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<"none" | "create" | "edit">("none");
 
@@ -54,8 +54,8 @@ export const Dashboard = () => {
               {
                 users.map((user) => (
                   <tr key={user.id} className="border-b border-b-accent-dark/30 hover:bg-background-tertiary/50 transition ease-in duration-300">
-                    <td className="align-middle p-2 text-text-light font-medium">{user.nombreDeUsuario}</td>
-                    <td className="align-middle p-2 text-text-light font-medium">{user.rolUsuario === 1 ? "Administrador" : "Operador"}</td>
+                    <td className="align-middle p-2 text-text-light font-medium">{user.username}</td>
+                    <td className="align-middle p-2 text-text-light font-medium">{user.roleUser === 1 ? "Administrador" : "Operador"}</td>
                     <td className="align-middle text-right p-2">
                       <button
                         className="bg-accent-light py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"

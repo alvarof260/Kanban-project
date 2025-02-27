@@ -19,7 +19,7 @@ export const Boards = () => {
   };
 
   const handleAddBoard = (newBoard: Board, newState: Modals) => {
-    const newBoards = [...boards, { ...newBoard, nombreUsuarioPropietario: user ? user?.nombreDeUsuario : "" }];
+    const newBoards = [...boards, { ...newBoard, nombreUsuarioPropietario: user ? user?.username : "" }];
     setBoards(newBoards);
     setIsOpen(newState);
   };
@@ -79,7 +79,7 @@ export const Boards = () => {
                   <h2 className="text-2xl font-semibold text-text-light hover:underline">{board.nombre}</h2>
                 </Link >
                 {
-                  user.nombreDeUsuario === board.nombreUsuarioPropietario &&
+                  user.username === board.nombreUsuarioPropietario &&
                   <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} onUpdateBoard={(idBoard: number) => {
                     setIsOpen("edit");
                     setIdSelected(idBoard);

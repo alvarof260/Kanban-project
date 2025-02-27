@@ -1,18 +1,13 @@
-import { LoginSchema, LoginValues, User } from "../../../../models";
+import { ApiResponse, LoginSchema, LoginValues, User } from "../../../../models";
 import { useSessionContext } from "../../../../contexts/session.context";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InputForm } from "../../../../components";
 import { useState } from "react";
 
-interface ResponseFetch {
-  success: boolean;
-  message: string;
-  data?: User;
-}
 
 const initialState: LoginValues = {
-  nombreDeUsuario: "",
+  username: "",
   password: ""
 };
 
@@ -35,12 +30,12 @@ export const LoginForm = () => {
     try {
       const response = await fetch("http://localhost:5093/api/login", options);
 
-      const data: ResponseFetch = await response.json();
+      const data: ApiResponse<User> = await response.json();
       if (!response.ok) {
         throw new Error(data.message || "Error al conectar con el servidor.");
       }
 
-      if (!data.success || !data?.data) {
+      if (!data.success || !data.data) {
         setError(data.message || "Error desconocido");
         return;
       }
@@ -60,12 +55,12 @@ export const LoginForm = () => {
     <>
       <form className="flex flex-col h-full w-full items-center justify-start " onSubmit={handleSubmit(onSubmit)} >
         <InputForm
-          name="nombreDeUsuario"
+          name="username"
           label="usuario"
           control={control}
           type="text"
           placeholder="ingrese el usuario"
-          error={errors.nombreDeUsuario}
+          error={errors.username}
         />
         <InputForm
           name="password"

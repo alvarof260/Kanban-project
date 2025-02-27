@@ -4,5 +4,5 @@ import { useSessionContext } from "../contexts/session.context";
 export const AdminGuard = () => {
   const { user } = useSessionContext();
 
-  return user?.rolUsuario === 1 ? <Outlet /> : <Navigate to={"/boards"} replace />;
+  return user?.roleUser === 1 ? <Outlet /> : <Navigate to={"/boards"} replace />;
 };

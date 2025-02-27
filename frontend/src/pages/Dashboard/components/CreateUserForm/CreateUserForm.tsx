@@ -5,9 +5,9 @@ import { InputForm } from "../../../../components";
 import { User } from "../../../../models";
 
 export const CreateUserSchema = z.object({
-  usuario: z.string().min(1, "El usuario es obligatorio").max(50, "El usuario no debe exceder los 50 caracteres"),
+  username: z.string().min(1, "El usuario es obligatorio").max(50, "El usuario no debe exceder los 50 caracteres"),
   password: z.string().min(1, "El password es obligatorio").max(50, "El password no debe exceder los 50 caracteres"),
-  rolUsuario: z.number()
+  roleUser: z.number()
 });
 
 export type CreateUserValues = z.infer<typeof CreateUserSchema>
@@ -20,9 +20,9 @@ export const CreateUserForm = ({ onAddUser }: Props) => {
   const { control, handleSubmit, formState: { errors } } = useForm<CreateUserValues>({
     resolver: zodResolver(CreateUserSchema),
     defaultValues: {
-      usuario: "",
+      username: "",
       password: "",
-      rolUsuario: 0
+      roleUser: 0
     }
   });
 
@@ -34,7 +34,7 @@ export const CreateUserForm = ({ onAddUser }: Props) => {
       credentials: "include"
     };
     try {
-      const response = await fetch("http://localhost:5093/api/Usuario", options);
+      const response = await fetch("http://localhost:5093/api/User", options);
 
       if (!response.ok) {
         throw new Error("Error al conectar con el servidor.");
@@ -55,12 +55,12 @@ export const CreateUserForm = ({ onAddUser }: Props) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <InputForm
-        name="usuario"
+        name="username"
         label="usuario"
         control={control}
         type="text"
         placeholder="ingrese el usuario"
-        error={errors.usuario}
+        error={errors.username}
       />
       <InputForm
         name="password"
@@ -73,7 +73,7 @@ export const CreateUserForm = ({ onAddUser }: Props) => {
       <section className="flex flex-col justify-start gap-2 h-28 w-full">
         <label className="text-sm font-medium text-text-light" htmlFor="estado">usuarios</label>
         <Controller
-          name="rolUsuario"
+          name="roleUser"
           control={control}
           render={({ field }) => (
             <select
@@ -94,7 +94,7 @@ export const CreateUserForm = ({ onAddUser }: Props) => {
             </select>
           )}
         />
-        {errors.rolUsuario && <p className="text-xs font-medium text-red-500/70 mt-2">{errors.rolUsuario.message}</p>}
+        {errors.roleUser && <p className="text-xs font-medium text-red-500/70 mt-2">{errors.roleUser.message}</p>}
       </section>
       <button
         className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"

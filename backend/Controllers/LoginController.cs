@@ -1,5 +1,6 @@
 using Kanban.Models;
 using Kanban.ViewModels;
+using Kanban.ViewModels.Response;
 using Kanban.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +11,12 @@ namespace Kanban.Controllers;
 public class LoginController : ControllerBase
 {
   private readonly ILogger<LoginController> _logger;
-  private IUsuarioRepository _usuarioRepository;
+  private IUserRepository _userRepository;
 
-  public LoginController(ILogger<LoginController> logger, IUsuarioRepository usuarioRepository)
+  public LoginController(ILogger<LoginController> logger, IUserRepository userRepository)
   {
     this._logger = logger;
-    this._usuarioRepository = usuarioRepository;
+    this._userRepository = userRepository;
   }
 
 
@@ -25,41 +26,39 @@ public class LoginController : ControllerBase
     try
     {
       if (!ModelState.IsValid)
-        return BadRequest(new
-        {
-          success = false,
-          message = "Los datos enviados no son válidos.",
-        });
-
-      if (string.IsNullOrEmpty(model.NombreDeUsuario) && string.IsNullOrEmpty(model.Password))
       {
-        return BadRequest(new { success = false, message = "Por favor debe ingresar su usuario y contraseña." });
+        return BadRequest(new ApiResponse<string>(false, "Los datos enviados no son válidos", null));
       }
 
-      Usuario usuario = _usuarioRepository.GetUsuarioNombre(model.NombreDeUsuario);
-
-      if (usuario == null || usuario.Password != model.Password)
+      if (string.IsNullOrEmpty(model.Username) && string.IsNullOrEmpty(model.Password))
       {
-        _logger.LogInformation("Intento de acceso invalido - Usuario: " + model.NombreDeUsuario + " Clave ingresada: " + model.Password + ".");
-        return Unauthorized(new { success = false, message = "Usuario o contraseña incorrectos." });
+        return BadRequest(new ApiResponse<string>(false, "Por favor  debe ingresar su usuario y contraseña.", null));
+      }
+
+      User user = _userRepository.GetUserLogin(model.Username);
+
+      if (user == null || user.Password != model.Password)
+      {
+        _logger.LogInformation("Intento de acceso invalido - Usuario: " + model.Username + " Clave ingresada: " + model.Password + ".");
+        return Unauthorized(new ApiResponse<string>(false, "Usuario o contraseña incorrectos.", null));
       }
 
       HttpContext.Session.SetString("IsAuthenticated", "true");
-      HttpContext.Session.SetInt32("id", usuario.Id);
-      HttpContext.Session.SetString("nombre", usuario.NombreDeUsuario);
-      HttpContext.Session.SetInt32("rol", Convert.ToInt32(usuario.RolUsuario));
-      _logger.LogInformation("El usuario " + usuario.NombreDeUsuario + " ingreso correctamente.");
-      return Ok(new { success = true, message = "Usuario ingreso correctamente", data = usuario });
+      HttpContext.Session.SetInt32("id", user.Id);
+      HttpContext.Session.SetString("username", user.Username);
+      HttpContext.Session.SetInt32("role", Convert.ToInt32(user.RoleUser));
+      _logger.LogInformation("El usuario " + user.Username + " ingreso correctamente.");
+      return Ok(new ApiResponse<User>(true, "Usuario ingreso correctamente", user));
     }
     catch (KeyNotFoundException ex)
     {
-      _logger.LogError("Error al cerrar sesión: " + ex.Message);
-      return StatusCode(500, new { success = false, message = ex.Message });
+      _logger.LogError("Error al iniciar sesión: " + ex.Message);
+      return StatusCode(500, new ApiResponse<string>(false, "Ocurrió un error interno en el servidor.", ex.Message));
     }
-    catch (System.Exception)
+    catch (Exception ex)
     {
-
-      throw;
+      _logger.LogError("Error al iniciar sesión: " + ex.Message);
+      return StatusCode(500, new ApiResponse<string>(false, "Ocurrió un error interno en el servidor.", ex.Message));
     }
   }
 
@@ -72,12 +71,12 @@ public class LoginController : ControllerBase
 
       Response.Cookies.Delete(".AspNetCore.Session");
 
-      return Ok(new { success = true, message = "Sesión cerrada correctamente." });
+      return Ok(new ApiResponse<string>(true, "Sesión cerrada correctamente.", null));
     }
     catch (Exception ex)
     {
       _logger.LogError("Error al cerrar sesión: " + ex.Message);
-      return StatusCode(500, new { success = false, message = "Error al cerrar sesión." });
+      return StatusCode(500, new ApiResponse<string>(false, "Ocurrió un error interno en el servidor.", ex.Message));
     }
   }
 }
