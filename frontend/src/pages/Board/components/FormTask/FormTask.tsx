@@ -4,6 +4,7 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { color } from "../FormTaskCreate/FormTaskCreate";
 import { InputForm } from "../../../../components";
+import { useSessionContext } from "../../../../contexts/session.context";
 
 interface FormTaskProps {
   stateInitial: number;
@@ -31,6 +32,7 @@ export const FormTask = ({ stateInitial, idTask, isOwnerBoard, onUpdateTask }: F
       status: stateInitial
     }
   });
+  const { user } = useSessionContext();
 
   const onSubmit: SubmitHandler<TaskUpdateValues> = async (formData: TaskUpdateValues) => {
     formData.color = color[formData.status];
@@ -65,7 +67,7 @@ export const FormTask = ({ stateInitial, idTask, isOwnerBoard, onUpdateTask }: F
   return (
     <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
       {
-        isOwnerBoard &&
+        (isOwnerBoard || user?.roleUser) &&
         <>
           <InputForm
             name="name"

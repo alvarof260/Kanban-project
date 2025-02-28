@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { EllipsisHorizontal } from "../../../../icons";
+import { useSessionContext } from "../../../../contexts/session.context";
 
 interface Props {
   idTask: number;
@@ -15,6 +16,7 @@ interface Props {
 export const CardActions = ({ idTask, idUsuarioAsignado, state, nombreUsuarioAsignado, isOwnerBoard, onDeleteTask, onUpdateTask, onAssignTask }: Props) => {
   const [actions, setActions] = useState<boolean>(false);
   const actionsRef = useRef<HTMLDivElement | null>(null);
+  const { user } = useSessionContext();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -59,7 +61,7 @@ export const CardActions = ({ idTask, idUsuarioAsignado, state, nombreUsuarioAsi
               Editar Tarea
             </button>
             {
-              isOwnerBoard &&
+              (isOwnerBoard || user?.roleUser === 1) &&
               <>
                 <button
                   className="outline-none cursor-pointer text-text-light font-normal text-sm px-2 py-1.5 rounded-md hover:bg-background-tertiary/70 transition duration-300 ease-in w-full flex items-start"

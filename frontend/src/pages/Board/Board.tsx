@@ -127,7 +127,7 @@ export const BoardKanban = () => {
                         <CardHeader>
                           <h2 className="text-base font semibold text-text-light">{task.name}</h2>
                           {
-                            (isOwnerBoard || user?.id === task.assignedUserId) &&
+                            (isOwnerBoard || user?.id === task.assignedUserId || user?.roleUser === 1) &&
                             <CardActions
                               idTask={task.id}
                               idUsuarioAsignado={task.assignedUserId}
