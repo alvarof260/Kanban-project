@@ -13,8 +13,8 @@ interface Props {
 }
 
 export const AssignTaskSchema = z.object({
-  idUsuarioAsignado: z.number(),
-  nombreUsuarioAsignado: z.string()
+  assignedUserId: z.number(),
+  assignedUserName: z.string()
 });
 
 export type AssignTaskValues = z.infer<typeof AssignTaskSchema>;
@@ -23,12 +23,12 @@ export const AssignTaskForm = ({ idUsuarioAsignado, nombreUsuarioAsignado, idTas
   const { control, handleSubmit, setValue, formState: { errors } } = useForm<AssignTaskValues>({
     resolver: zodResolver(AssignTaskSchema),
     defaultValues: {
-      idUsuarioAsignado: idUsuarioAsignado,
-      nombreUsuarioAsignado: nombreUsuarioAsignado
+      assignedUserId: idUsuarioAsignado,
+      assignedUserName: nombreUsuarioAsignado
     }
   });
 
-  const { data: users } = useFetch<User>("http://localhost:5093/api/usuario");
+  const { data: users } = useFetch<User>("http://localhost:5093/api/User");
 
   const onSubmit: SubmitHandler<AssignTaskValues> = async (formData: AssignTaskValues) => {
     const options: RequestInit = {
@@ -39,7 +39,7 @@ export const AssignTaskForm = ({ idUsuarioAsignado, nombreUsuarioAsignado, idTas
     };
 
     try {
-      const response = await fetch(`http://localhost:5093/api/Tarea/asignar/${idTask}`, options);
+      const response = await fetch(`http://localhost:5093/api/Task/assign/${idTask}`, options);
 
       if (!response.ok) {
         throw new Error('Error al conectar con el servidor.');
@@ -60,7 +60,7 @@ export const AssignTaskForm = ({ idUsuarioAsignado, nombreUsuarioAsignado, idTas
   const handleUserChange = (userId: number) => {
     const selectedUser = users.find(user => user.id === userId);
     if (selectedUser) {
-      setValue("nombreUsuarioAsignado", selectedUser.nombreDeUsuario);
+      setValue("assignedUserName", selectedUser.username);
     }
   };
 
@@ -69,7 +69,7 @@ export const AssignTaskForm = ({ idUsuarioAsignado, nombreUsuarioAsignado, idTas
       <section className="flex flex-col justify-start gap-2 h-28 w-full">
         <label className="text-sm font-medium text-text-light" htmlFor="estado">usuarios</label>
         <Controller
-          name="idUsuarioAsignado"
+          name="assignedUserId"
           control={control}
           rules={{ required: "Debe seleccionar un usuario" }} // Validación opcional
           render={({ field }) => (
@@ -86,13 +86,13 @@ export const AssignTaskForm = ({ idUsuarioAsignado, nombreUsuarioAsignado, idTas
               <option value="" disabled>Seleccione un usuario</option> {/* Opción vacía */}
               {users.map((user) => (
                 <option className="bg-background-primary" key={user.id} value={user.id}>
-                  {user.nombreDeUsuario}
+                  {user.username}
                 </option>
               ))}
             </select>
           )}
         />
-        {errors.idUsuarioAsignado && <p className="text-xs font-medium text-red-500/70 mt-2">{errors.idUsuarioAsignado.message}</p>}
+        {errors.assignedUserId && <p className="text-xs font-medium text-red-500/70 mt-2">{errors.assignedUserId.message}</p>}
       </section>
       <button
         className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"

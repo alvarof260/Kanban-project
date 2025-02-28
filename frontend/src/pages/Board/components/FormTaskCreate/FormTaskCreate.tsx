@@ -11,10 +11,10 @@ interface FormTaskCreateProps {
 }
 
 export const TaskCreateSchema = z.object({
-  nombre: z.string().min(1, "El nombre de la tarea es obligatorio").max(100, "El nombre de tarea no debe exceder los 100 caracteres."),
-  descripcion: z.string().min(1, "La descripcion de la tarea es obligatorio").max(255, "La descripcion no debe exceder los 255 caracteres."),
+  name: z.string().min(1, "El nombre de la tarea es obligatorio").max(100, "El nombre de tarea no debe exceder los 100 caracteres."),
+  description: z.string().min(1, "La descripcion de la tarea es obligatorio").max(255, "La descripcion no debe exceder los 255 caracteres."),
   color: z.string().max(30, "El color de la tarea no debe exceder los 30 caracteres"),
-  estado: z.number().gte(1).lte(5)
+  status: z.number().gte(1).lte(5)
 });
 
 export type TaskCreateValues = z.infer<typeof TaskCreateSchema>
@@ -31,10 +31,10 @@ export const FormTaskCreate = ({ state, onAddTask }: FormTaskCreateProps) => {
   const { control, handleSubmit, formState: { errors } } = useForm<TaskCreateValues>({
     resolver: zodResolver(TaskCreateSchema),
     defaultValues: {
-      nombre: "",
-      descripcion: "",
+      name: "",
+      description: "",
       color: color[state],
-      estado: state
+      status: state
     }
   });
   const { idBoard } = useParams();
@@ -48,7 +48,7 @@ export const FormTaskCreate = ({ state, onAddTask }: FormTaskCreateProps) => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5093/api/Tarea/${idBoard}`, options);
+      const response = await fetch(`http://localhost:5093/api/Task/${idBoard}`, options);
 
       if (!response.ok) {
         throw new Error('Error al conectar con el servidor.');
@@ -71,20 +71,20 @@ export const FormTaskCreate = ({ state, onAddTask }: FormTaskCreateProps) => {
   return (
     <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
       <InputForm
-        name="nombre"
+        name="name"
         label="nombre"
         control={control}
         type="text"
         placeholder="ingrese el nombre de la tarea"
-        error={errors.nombre}
+        error={errors.name}
       />
       <InputForm
-        name="descripcion"
+        name="description"
         label="descripcion"
         control={control}
         type="text"
         placeholder="ingrese la descripcion de la tarea"
-        error={errors.descripcion}
+        error={errors.description}
       />
       <button
         className="bg-accent-light w-full py-2 px-4 rounded-md text-sm font-medium cursor-pointer hover:bg-primary-light transition ease-in duration-300"

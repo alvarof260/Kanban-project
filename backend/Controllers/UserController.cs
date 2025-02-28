@@ -24,8 +24,8 @@ public class UserController : ControllerBase
   {
     try
     {
-      if (string.IsNullOrEmpty(HttpContext.Session.GetString("username")))
-        return Unauthorized(new { success = false, message = "No has iniciado sesión." });
+      var sessionValidation = ValidateSession();
+      if (sessionValidation != null) return sessionValidation;
 
       List<GetUserViewModel> users = _userRepository.GetUsers();
 
@@ -43,11 +43,11 @@ public class UserController : ControllerBase
   {
     try
     {
-      if (string.IsNullOrEmpty(HttpContext.Session.GetString("username")))
-        return Unauthorized(new ApiResponse<string>(false, "No has iniciado sesión.", null));
+      var sessionValidation = ValidateSession();
+      if (sessionValidation != null) return sessionValidation;
 
-      if (HttpContext.Session.GetInt32("role") != 1)
-        return StatusCode(403, new ApiResponse<string>(false, "No tienes permisos necesarios.", null));
+      var roleValidation = ValidateRole();
+      if (roleValidation != null) return roleValidation;
 
       if (!ModelState.IsValid)
       {
@@ -75,11 +75,11 @@ public class UserController : ControllerBase
   {
     try
     {
-      if (string.IsNullOrEmpty(HttpContext.Session.GetString("username")))
-        return Unauthorized(new ApiResponse<string>(false, "No has iniciado sesión.", null));
+      var sessionValidation = ValidateSession();
+      if (sessionValidation != null) return sessionValidation;
 
-      if (HttpContext.Session.GetInt32("role") != 1)
-        return StatusCode(403, new ApiResponse<string>(false, "No tienes permisos necesarios.", null));
+      var roleValidation = ValidateRole();
+      if (roleValidation != null) return roleValidation;
 
       if (!ModelState.IsValid)
       {
@@ -112,11 +112,11 @@ public class UserController : ControllerBase
   {
     try
     {
-      if (string.IsNullOrEmpty(HttpContext.Session.GetString("username")))
-        return Unauthorized(new ApiResponse<string>(false, "No has iniciado sesión.", null));
+      var sessionValidation = ValidateSession();
+      if (sessionValidation != null) return sessionValidation;
 
-      if (HttpContext.Session.GetInt32("role") != 1)
-        return StatusCode(403, new ApiResponse<string>(false, "No tienes permisos necesarios.", null));
+      var roleValidation = ValidateRole();
+      if (roleValidation != null) return roleValidation;
 
       _userRepository.DeleteUser(id);
 
@@ -137,5 +137,21 @@ public class UserController : ControllerBase
       _logger.LogError(ex, "Error al eliminar usuario.");
       return StatusCode(500, new ApiResponse<string>(false, "Ocurrió un error interno en el servidor.", ex.Message));
     }
+  }
+
+  private IActionResult ValidateSession()
+  {
+    if (string.IsNullOrEmpty(HttpContext.Session.GetString("username")))
+      return Unauthorized(new ApiResponse<string>(false, "No has iniciado sesión.", null));
+
+    return null;
+  }
+
+  private IActionResult ValidateRole()
+  {
+    if (HttpContext.Session.GetInt32("role") != 1)
+      return StatusCode(403, new ApiResponse<string>(false, "No tienes permisos necesarios.", null));
+
+    return null;
   }
 }

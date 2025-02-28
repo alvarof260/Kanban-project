@@ -6,18 +6,18 @@ using Microsoft.Data.Sqlite;
 
 namespace Kanban.Repositories;
 
-public class TareaRepository : ITareaRepository
+public class TaskRepository : ITaskRepository
 {
   private readonly string _connectionString;
 
-  public TareaRepository(string connectionString)
+  public TaskRepository(string connectionString)
   {
     this._connectionString = connectionString;
   }
 
-  public GetTareasViewModel CreateTarea(int id, CreateTareaViewModel tarea)
+  public GetTaskViewModel CreateTask(int boardId, CreateTaskViewModel task)
   {
-    GetTareasViewModel nuevaTarea = null;
+    GetTaskViewModel newTask = null;
 
     string query = @"INSERT INTO Tarea 
                      (id_tablero, nombre, estado, descripcion, color, id_usuario_asignado)
@@ -30,32 +30,32 @@ public class TareaRepository : ITareaRepository
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@IdTablero", id);
-      command.Parameters.AddWithValue("@Nombre", tarea.Nombre);
-      command.Parameters.AddWithValue("@Estado", tarea.Estado);
-      command.Parameters.AddWithValue("@Descripcion", tarea.Descripcion);
-      command.Parameters.AddWithValue("@Color", tarea.Color);
+      command.Parameters.AddWithValue("@IdTablero", boardId);
+      command.Parameters.AddWithValue("@Nombre", task.Name);
+      command.Parameters.AddWithValue("@Estado", task.Status);
+      command.Parameters.AddWithValue("@Descripcion", task.Description);
+      command.Parameters.AddWithValue("@Color", task.Color);
       command.Parameters.AddWithValue("@IdUsuarioAsignado", 0);
 
-      int idGenerado = Convert.ToInt32(command.ExecuteScalar());
+      int id = Convert.ToInt32(command.ExecuteScalar());
 
-      nuevaTarea = new GetTareasViewModel
+      newTask = new GetTaskViewModel
       {
-        Id = idGenerado,
-        Nombre = tarea.Nombre,
-        Estado = tarea.Estado,
-        Descripcion = tarea.Descripcion,
-        Color = tarea.Color,
-        IdUsuarioAsignado = 0,
-        NombreUsuarioAsignado = ""
+        Id = id,
+        Name = task.Name,
+        Status = task.Status,
+        Description = task.Description,
+        Color = task.Color,
+        AssignedUserId = 0,
+        AssignedUserName = ""
       };
 
       connection.Close();
     }
-    return nuevaTarea;
+    return newTask;
   }
 
-  public void UpdateTarea(int id, UpdateTareaViewModel tarea)
+  public void UpdateTask(int id, UpdateTaskViewModel task)
   {
     string query = @"UPDATE Tarea
                      SET 
@@ -72,18 +72,18 @@ public class TareaRepository : ITareaRepository
       SqliteCommand command = new SqliteCommand(query, connection);
 
       command.Parameters.AddWithValue("@Nombre",
-         string.IsNullOrEmpty(tarea.Nombre) ? DBNull.Value : tarea.Nombre);
+         string.IsNullOrEmpty(task.Name) ? DBNull.Value : task.Name);
       command.Parameters.AddWithValue("@Estado",
-          tarea.Estado.HasValue ? tarea.Estado : DBNull.Value);
+          task.Status.HasValue ? task.Status : DBNull.Value);
       command.Parameters.AddWithValue("@Descripcion",
-          string.IsNullOrEmpty(tarea.Descripcion) ? DBNull.Value : tarea.Descripcion);
+          string.IsNullOrEmpty(task.Description) ? DBNull.Value : task.Description);
       command.Parameters.AddWithValue("@Color",
-          string.IsNullOrEmpty(tarea.Color) ? DBNull.Value : tarea.Color);
+          string.IsNullOrEmpty(task.Color) ? DBNull.Value : task.Color);
       command.Parameters.AddWithValue("@Id", id);
 
-      int filasAfectadas = command.ExecuteNonQuery();
+      int rowsAffected = command.ExecuteNonQuery();
 
-      if (filasAfectadas == 0)
+      if (rowsAffected == 0)
       {
         throw new KeyNotFoundException($"No se encontro la tarea con ID: {id}.");
       }
@@ -92,9 +92,9 @@ public class TareaRepository : ITareaRepository
     }
   }
 
-  public Tarea GetTareaById(int id)
+  public TaskBoard GetTaskById(int id)
   {
-    Tarea tareaBuscado = null;
+    TaskBoard taskFound = null;
 
     string query = @"SELECT * 
                      FROM Tarea 
@@ -109,15 +109,15 @@ public class TareaRepository : ITareaRepository
       {
         if (reader.Read())
         {
-          tareaBuscado = new Tarea
+          taskFound = new TaskBoard
           {
             Id = reader.GetInt32(0),
-            IdTablero = reader.GetInt32(1),
-            Nombre = reader.GetString(2),
-            Estado = (EstadoTarea)reader.GetInt32(3),
-            Descripcion = reader.GetString(4),
+            BoardId = reader.GetInt32(1),
+            Name = reader.GetString(2),
+            Status = (StatusTask)reader.GetInt32(3),
+            Description = reader.GetString(4),
             Color = reader.GetString(5),
-            IdUsuarioAsignado = reader.GetInt32(6)
+            AssignedUserId = reader.GetInt32(6)
           };
         }
       }
@@ -125,19 +125,26 @@ public class TareaRepository : ITareaRepository
       connection.Close();
     }
 
-    if (tareaBuscado == null)
+    if (taskFound == null)
     {
       throw new KeyNotFoundException($"No se encontro la tarea con ID: {id}.");
     }
 
-    return tareaBuscado;
+    return taskFound;
   }
 
-  public List<GetTareasViewModel> GetTareaByIdUsuario(int idUsuario)
+  public List<GetTaskViewModel> GetTasksByUserId(int userId)
   {
-    List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
+    List<GetTaskViewModel> tasks = new List<GetTaskViewModel>();
 
-    string query = @"SELECT t.id, t.nombre, t.estado, t.descripcion, t.color, t.id_usuario_asignado, u.nombre_de_usuario
+    string query = @"SELECT 
+                      t.id, 
+                      t.nombre, 
+                      t.estado, 
+                      t.descripcion, 
+                      t.color, 
+                      t.id_usuario_asignado, 
+                      u.nombre_de_usuario
                      FROM Tarea t
                      LEFT JOIN Usuario u ON t.id_usuario_asignado = u.id
                      WHERE id_usuario_asignado = @Id;";
@@ -147,33 +154,33 @@ public class TareaRepository : ITareaRepository
       connection.Open();
 
       SqliteCommand command = new SqliteCommand(query, connection);
-      command.Parameters.AddWithValue("@Id", idUsuario);
+      command.Parameters.AddWithValue("@Id", userId);
 
       using (SqliteDataReader reader = command.ExecuteReader())
       {
         while (reader.Read())
         {
-          tareas.Add(new GetTareasViewModel
+          tasks.Add(new GetTaskViewModel
           {
             Id = reader.GetInt32(0),
-            Nombre = reader.GetString(1),
-            Estado = (EstadoTarea)reader.GetInt32(2),
-            Descripcion = reader.GetString(3),
+            Name = reader.GetString(1),
+            Status = (StatusTask)reader.GetInt32(2),
+            Description = reader.GetString(3),
             Color = reader.GetString(4),
-            IdUsuarioAsignado = reader.GetInt32(5),
-            NombreUsuarioAsignado = reader.IsDBNull(6) ? "" : reader.GetString(6)
+            AssignedUserId = reader.GetInt32(5),
+            AssignedUserName = reader.IsDBNull(6) ? "" : reader.GetString(6)
           });
         }
       }
       connection.Close();
     }
 
-    return tareas;
+    return tasks;
   }
 
-  public List<GetTareasViewModel> GetTareaByIdTablero(int idTablero)
+  public List<GetTaskViewModel> GetTasksByBoardId(int boardId)
   {
-    List<GetTareasViewModel> tareas = new List<GetTareasViewModel>();
+    List<GetTaskViewModel> tasks = new List<GetTaskViewModel>();
 
     string query = @"SELECT 
                       t.id, 
@@ -192,31 +199,31 @@ public class TareaRepository : ITareaRepository
       connection.Open();
 
       SqliteCommand command = new SqliteCommand(query, connection);
-      command.Parameters.AddWithValue("@Id", idTablero);
+      command.Parameters.AddWithValue("@Id", boardId);
 
       using (SqliteDataReader reader = command.ExecuteReader())
       {
         while (reader.Read())
         {
-          tareas.Add(new GetTareasViewModel
+          tasks.Add(new GetTaskViewModel
           {
             Id = reader.GetInt32(0),
-            Nombre = reader.GetString(1),
-            Estado = (EstadoTarea)reader.GetInt32(2),
-            Descripcion = reader.GetString(3),
+            Name = reader.GetString(1),
+            Status = (StatusTask)reader.GetInt32(2),
+            Description = reader.GetString(3),
             Color = reader.GetString(4),
-            IdUsuarioAsignado = reader.GetInt32(5),
-            NombreUsuarioAsignado = reader.IsDBNull(6) ? "" : reader.GetString(6)
+            AssignedUserId = reader.GetInt32(5),
+            AssignedUserName = reader.IsDBNull(6) ? "" : reader.GetString(6)
           });
         }
       }
       connection.Close();
     }
 
-    return tareas;
+    return tasks;
   }
 
-  public void DeleteTarea(int id)
+  public void DeleteTask(int id)
   {
     string query = @"DELETE FROM Tarea 
                      WHERE id = @Id;";
@@ -229,9 +236,9 @@ public class TareaRepository : ITareaRepository
 
       command.Parameters.AddWithValue("@Id", id);
 
-      int filasAfectadas = command.ExecuteNonQuery();
+      int rowsAffected = command.ExecuteNonQuery();
 
-      if (filasAfectadas == 0)
+      if (rowsAffected == 0)
       {
         throw new KeyNotFoundException($"No se encontro la tarea con ID: {id}.");
       }
@@ -240,7 +247,7 @@ public class TareaRepository : ITareaRepository
     }
   }
 
-  public void AssignTarea(int idUsuario, int idTarea)
+  public void AssignTask(int userId, int taskId)
   {
     string query = @"UPDATE Tarea 
                      SET id_usuario_asignado = @IdUsuarioAsignado 
@@ -252,14 +259,14 @@ public class TareaRepository : ITareaRepository
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@IdUsuarioAsignado", idUsuario);
-      command.Parameters.AddWithValue("@Id", idTarea);
+      command.Parameters.AddWithValue("@IdUsuarioAsignado", userId);
+      command.Parameters.AddWithValue("@Id", taskId);
 
-      int filasAfectadas = command.ExecuteNonQuery();
+      int rowsAffected = command.ExecuteNonQuery();
 
-      if (filasAfectadas == 0)
+      if (rowsAffected == 0)
       {
-        throw new KeyNotFoundException($"No se encontro la tarea con ID: {idTarea}.");
+        throw new KeyNotFoundException($"No se encontro la tarea con ID: {taskId}.");
       }
 
       connection.Close();

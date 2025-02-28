@@ -5,18 +5,18 @@ using Microsoft.Data.Sqlite;
 
 namespace Kanban.Repositories;
 
-public class TableroRepository : ITableroRepository
+public class BoardRepository : IBoardRepository
 {
   private readonly string _connectionString;
 
-  public TableroRepository(string connectionString)
+  public BoardRepository(string connectionString)
   {
     this._connectionString = connectionString;
   }
 
-  public Tablero CreateTablero(CreateTableroViewModel tablero)
+  public Board CreateBoard(CreateBoardViewModel board)
   {
-    Tablero? nuevoTablero = null;
+    Board newBoard = null;
 
     string query = @"INSERT INTO Tablero (id_usuario_propietario, nombre, descripcion) 
                      VALUES (@IdUsuarioPropietario, @Nombre, @Descripcion);
@@ -28,27 +28,27 @@ public class TableroRepository : ITableroRepository
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@IdUsuarioPropietario", tablero.IdUsuarioPropietario);
-      command.Parameters.AddWithValue("@Nombre", tablero.Nombre);
-      command.Parameters.AddWithValue("@Descripcion", tablero.Descripcion);
+      command.Parameters.AddWithValue("@IdUsuarioPropietario", board.OwnerUserId);
+      command.Parameters.AddWithValue("@Nombre", board.Name);
+      command.Parameters.AddWithValue("@Descripcion", board.Description);
 
-      int idGenerado = Convert.ToInt32(command.ExecuteScalar());
+      int id = Convert.ToInt32(command.ExecuteScalar());
 
-      nuevoTablero = new Tablero
+      newBoard = new Board
       {
-        Id = idGenerado,
-        IdUsuarioPropietario = tablero.IdUsuarioPropietario,
-        Nombre = tablero.Nombre,
-        Descripcion = tablero.Descripcion
+        Id = id,
+        OwnerUserId = board.OwnerUserId,
+        Name = board.Name,
+        Description = board.Description
       };
 
       connection.Close();
     }
 
-    return nuevoTablero;
+    return newBoard;
   }
 
-  public void UpdateTablero(int id, UpdateTableroViewModel tablero)
+  public void UpdateBoard(int id, UpdateBoardViewModel board)
   {
     string query = @"UPDATE Tablero 
                      SET 
@@ -64,13 +64,13 @@ public class TableroRepository : ITableroRepository
 
       command.Parameters.AddWithValue("@Id", id);
       command.Parameters.AddWithValue("@Nombre",
-          string.IsNullOrEmpty(tablero.Nombre) ? DBNull.Value : tablero.Nombre);
+          string.IsNullOrEmpty(board.Name) ? DBNull.Value : board.Name);
       command.Parameters.AddWithValue("@Descripcion",
-          string.IsNullOrEmpty(tablero.Descripcion) ? DBNull.Value : tablero.Descripcion);
+          string.IsNullOrEmpty(board.Description) ? DBNull.Value : board.Description);
 
-      int tableroUpdate = command.ExecuteNonQuery();
+      int updatedBoard = command.ExecuteNonQuery();
 
-      if (tableroUpdate == 0)
+      if (updatedBoard == 0)
       {
         throw new KeyNotFoundException($"No se encontro el tablero con ID: {id}.");
       }
@@ -79,9 +79,10 @@ public class TableroRepository : ITableroRepository
     }
   }
 
-  public int GetIdPropietario(int id)
+  public int GetOwnerUserId(int id)
   {
-    string query = @"SELECT id_usuario_propietario 
+    string query = @"SELECT 
+                      id_usuario_propietario 
                      FROM Tablero 
                      WHERE id = @Id";
 
@@ -103,11 +104,15 @@ public class TableroRepository : ITableroRepository
     }
   }
 
-  public GetTablerosViewModel GetTableroId(int id)
+  public GetBoardViewModel GetBoardId(int id)
   {
-    GetTablerosViewModel tableroBuscado = null;
+    GetBoardViewModel boardFound = null;
 
-    string query = @"SELECT t.id, u.nombre_de_usuario, t.nombre, t.descripcion 
+    string query = @"SELECT 
+                      t.id, 
+                      u.nombre_de_usuario, 
+                      t.nombre, 
+                      t.descripcion 
                      FROM Tablero t 
                      LEFT JOIN Usuario u ON t.id_usuario_propietario = u.id
                      WHERE t.id = @Id;";
@@ -124,12 +129,12 @@ public class TableroRepository : ITableroRepository
       {
         if (reader.Read())
         {
-          tableroBuscado = new GetTablerosViewModel
+          boardFound = new GetBoardViewModel
           {
             Id = reader.GetInt32(0),
-            NombreUsuarioPropietario = reader.GetString(1),
-            Nombre = reader.GetString(2),
-            Descripcion = reader.GetString(3)
+            OwnerUserName = reader.GetString(1),
+            Name = reader.GetString(2),
+            Description = reader.GetString(3)
           };
         }
       }
@@ -137,19 +142,23 @@ public class TableroRepository : ITableroRepository
       connection.Close();
     }
 
-    if (tableroBuscado == null)
+    if (boardFound == null)
     {
       throw new KeyNotFoundException($"No se encontro el tablero con ID: {id}.");
     }
 
-    return tableroBuscado;
+    return boardFound;
   }
 
-  public List<GetTablerosViewModel> GetTableros()
+  public List<GetBoardViewModel> GetBoards()
   {
-    List<GetTablerosViewModel> tableros = new List<GetTablerosViewModel>();
+    List<GetBoardViewModel> boards = new List<GetBoardViewModel>();
 
-    string query = @"SELECT t.id, u.nombre_de_usuario , t.nombre, t.descripcion 
+    string query = @"SELECT 
+                      t.id, 
+                      u.nombre_de_usuario, 
+                      t.nombre, 
+                      t.descripcion 
                      FROM Tablero t
                      LEFT JOIN Usuario u ON t.id_usuario_propietario = u.id;";
 
@@ -163,12 +172,12 @@ public class TableroRepository : ITableroRepository
       {
         while (reader.Read())
         {
-          tableros.Add(new GetTablerosViewModel
+          boards.Add(new GetBoardViewModel
           {
             Id = reader.GetInt32(0),
-            NombreUsuarioPropietario = reader.GetString(1),
-            Nombre = reader.GetString(2),
-            Descripcion = reader.GetString(3)
+            OwnerUserName = reader.GetString(1),
+            Name = reader.GetString(2),
+            Description = reader.GetString(3)
           });
         }
       }
@@ -176,23 +185,23 @@ public class TableroRepository : ITableroRepository
       connection.Close();
     }
 
-    return tableros;
+    return boards;
   }
 
-  public List<GetTablerosViewModel> GetTablerosIdUsuario(int idUsuario)
+  public List<GetBoardViewModel> GetBoardsByUserId(int idUser)
   {
-    List<GetTablerosViewModel> tablerosBuscado = new List<GetTablerosViewModel>();
+    List<GetBoardViewModel> boardsFound = new List<GetBoardViewModel>();
 
     string query = @"SELECT t.id, 
-       u_p.nombre_de_usuario AS nombre_de_usuario,
-       t.nombre, 
-       t.descripcion
-FROM Tablero t                                                       
-LEFT JOIN Tarea ta ON t.id = ta.id_tablero                         
-LEFT JOIN Usuario u_t ON ta.id_usuario_asignado = u_t.id
-LEFT JOIN Usuario u_p ON t.id_usuario_propietario = u_p.id                
-WHERE t.id_usuario_propietario = @Id OR ta.id_usuario_asignado = @Id
-GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
+                      u_p.nombre_de_usuario AS nombre_de_usuario,
+                      t.nombre, 
+                      t.descripcion
+                     FROM Tablero t
+                     LEFT JOIN Tarea ta ON t.id = ta.id_tablero
+                     LEFT JOIN Usuario u_t ON ta.id_usuario_asignado = u_t.id
+                     LEFT JOIN Usuario u_p ON t.id_usuario_propietario = u_p.id
+                     WHERE t.id_usuario_propietario = @Id OR ta.id_usuario_asignado = @Id
+                     GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
 
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
@@ -200,18 +209,18 @@ GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
 
       SqliteCommand command = new SqliteCommand(query, connection);
 
-      command.Parameters.AddWithValue("@Id", idUsuario);
+      command.Parameters.AddWithValue("@Id", idUser);
 
       using (SqliteDataReader reader = command.ExecuteReader())
       {
         while (reader.Read())
         {
-          tablerosBuscado.Add(new GetTablerosViewModel
+          boardsFound.Add(new GetBoardViewModel
           {
             Id = reader.GetInt32(0),
-            NombreUsuarioPropietario = reader.GetString(1),
-            Nombre = reader.GetString(2),
-            Descripcion = reader.GetString(3)
+            OwnerUserName = reader.GetString(1),
+            Name = reader.GetString(2),
+            Description = reader.GetString(3)
           });
         }
       }
@@ -219,12 +228,12 @@ GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
       connection.Close();
     }
 
-    return tablerosBuscado;
+    return boardsFound;
   }
 
-  public void DeleteTablero(int id)
+  public void DeleteBoard(int id)
   {
-    if (TieneTarea(id))
+    if (HasTasks(id))
     {
       throw new InvalidOperationException("No se puede eliminar el tablero porque tiene tareas asignadas.");
     }
@@ -240,9 +249,9 @@ GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
 
       command.Parameters.AddWithValue("@Id", id);
 
-      int filasAfectadas = command.ExecuteNonQuery();
+      int rowsAffected = command.ExecuteNonQuery();
 
-      if (filasAfectadas == 0)
+      if (rowsAffected == 0)
       {
         throw new KeyNotFoundException($"No se encontro el tablero con ID: {id}.");
       }
@@ -251,10 +260,15 @@ GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
     }
   }
 
-  private bool TieneTarea(int id)
+  private bool HasTasks(int id)
   {
-    int contador;
-    string query = @"SELECT COUNT(*) FROM Tarea WHERE id_tablero = @Id;";
+    int count;
+
+    string query = @"SELECT 
+                      COUNT(*) 
+                     FROM Tarea 
+                     WHERE id_tablero = @Id;";
+
     using (SqliteConnection connection = new SqliteConnection(_connectionString))
     {
       connection.Open();
@@ -262,10 +276,11 @@ GROUP BY t.id, u_p.nombre_de_usuario, t.nombre, t.descripcion;";
       SqliteCommand command = new SqliteCommand(query, connection);
 
       command.Parameters.AddWithValue("@Id", id);
-      contador = Convert.ToInt32(command.ExecuteScalar());
+      count = Convert.ToInt32(command.ExecuteScalar());
 
       connection.Close();
     }
-    return contador > 0;
+
+    return count > 0;
   }
 }

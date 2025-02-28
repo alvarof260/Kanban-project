@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { CardBody, CardFooter, CardHeader, CustomModal } from "../../components";
 import { ESTADOS } from "../../constants";
-import { Task, Board } from "../../models";
+import { Board, Task } from "../../models";
 import { ColumnTask, TitleColumn, GroupTask, TaskCard, FormTask, FormTaskCreate, TaskUpdateValues, CardActions } from "./components";
 import { AssignTaskForm, AssignTaskValues } from "./components/AssignTaskForm/AssignTaskForm";
 import { useFetch } from "../../hooks";
@@ -11,7 +11,7 @@ import { useSessionContext } from "../../contexts/session.context";
 export const BoardKanban = () => {
   const { idBoard } = useParams();
   const { user } = useSessionContext();
-  const { data: tasks, setData: setTasks } = useFetch<Task>(`http://localhost:5093/api/Tarea/Tablero/${idBoard}`);
+  const { data: tasks, setData: setTasks } = useFetch<Task>(`http://localhost:5093/api/Task/GetTasksByBoardId/${idBoard}`);
   const [isOpen, setIsOpen] = useState<"create" | "edit" | "assign" | "delete" | "none">("none");
   const [infoActions, setInfoActions] = useState<{ estado: number, id: number, idUsuarioAsignado: number, nombreUsuarioAsignado: string }>({
     estado: 0,
@@ -30,7 +30,7 @@ export const BoardKanban = () => {
         credentials: "include"
       };
       try {
-        const response = await fetch(`http://localhost:5093/api/Tablero/tablero/${idBoard}`, options);
+        const response = await fetch(`http://localhost:5093/api/Board/getByBoardId/${idBoard}`, options);
 
         if (!response.ok) {
           throw new Error("Error al conectar con el servidor.");
@@ -59,7 +59,7 @@ export const BoardKanban = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5093/api/Tarea/${id}`, options);
+      const response = await fetch(`http://localhost:5093/api/Task/${id}`, options);
 
       if (!response.ok) {
         throw new Error('Error al conectar con el servidor.');
@@ -78,10 +78,10 @@ export const BoardKanban = () => {
       if (task.id === id) {
         return {
           ...task,
-          nombre: newState.nombre !== "" ? newState.nombre : task.nombre,
-          descripcion: newState.descripcion !== "" ? newState.descripcion : task.descripcion,
+          name: newState.name !== "" ? newState.name : task.name,
+          description: newState.description !== "" ? newState.description : task.description,
           color: newState.color !== "" ? newState.color : task.color,
-          estado: newState.estado !== task.estado ? newState.estado : task.estado
+          status: newState.status !== task.status ? newState.status : task.status
         };
       } else {
         return task;
@@ -103,13 +103,13 @@ export const BoardKanban = () => {
   const handleAssignTask = (newState: AssignTaskValues, id: number) => {
     const newTasks = tasks.map((task) =>
       task.id === id
-        ? { ...task, idUsuarioAsignado: newState.idUsuarioAsignado, nombreUsuarioAsignado: newState.nombreUsuarioAsignado }
+        ? { ...task, assignedUserId: newState.assignedUserId, assignedUserName: newState.assignedUserName }
         : task);
     setTasks(newTasks);
     setIsOpen("none");
   };
 
-  const isOwnerBoard = board?.nombreUsuarioPropietario === user?.nombreDeUsuario;
+  const isOwnerBoard = board?.ownerUserName === user?.username;
 
   return (
     <>
@@ -117,22 +117,22 @@ export const BoardKanban = () => {
         <section className="flex flex-row w-full h-full gap-2">
           {Object.entries(ESTADOS).map(([estado, nombre]) => (
             <ColumnTask key={estado}>
-              <TitleColumn name={nombre} tasks={tasks.filter(task => task.estado === Number(estado))} />
+              <TitleColumn name={nombre} tasks={tasks.filter(task => task.status === Number(estado))} />
               <GroupTask isOwnerBoard={isOwnerBoard} onOpenModal={() => handleOpenModalCreate(Number(estado))}>
                 {tasks
-                  .filter((task) => task.estado === Number(estado))
+                  .filter((task) => task.status === Number(estado))
                   .map((task) => (
-                    <TaskCard>
+                    <TaskCard key={task.id}>
                       <section>
                         <CardHeader>
-                          <h2 className="text-base font semibold text-text-light">{task.nombre}</h2>
+                          <h2 className="text-base font semibold text-text-light">{task.name}</h2>
                           {
-                            (isOwnerBoard || user?.id === task.idUsuarioAsignado) &&
+                            (isOwnerBoard || user?.id === task.assignedUserId) &&
                             <CardActions
                               idTask={task.id}
-                              idUsuarioAsignado={task.idUsuarioAsignado}
-                              state={task.estado}
-                              nombreUsuarioAsignado={task.nombreUsuarioAsignado}
+                              idUsuarioAsignado={task.assignedUserId}
+                              state={task.status}
+                              nombreUsuarioAsignado={task.assignedUserName}
                               isOwnerBoard={isOwnerBoard}
                               onDeleteTask={handleDeleteTask}
                               onUpdateTask={(state: number, id: number) => {
@@ -149,11 +149,11 @@ export const BoardKanban = () => {
                           }
                         </CardHeader>
                         <CardBody>
-                          <p className="text-sm font-normal text-text-muted">{task.descripcion}</p>
+                          <p className="text-sm font-normal text-text-muted">{task.description}</p>
                         </CardBody>
                       </section>
                       <CardFooter>
-                        <span className="text-xs font-normal text-primary-medium">{task.nombreUsuarioAsignado !== "" ? `Tarea asignada: ${task.nombreUsuarioAsignado}` : "Tarea no asignada"}</span>
+                        <span className="text-xs font-normal text-primary-medium">{task.assignedUserName !== "" ? `Tarea asignada: ${task.assignedUserName}` : "Tarea no asignada"}</span>
                         <span className={`rounded-full w-4 h-4 ${task.color}`}></span>
                       </CardFooter>
                     </TaskCard>

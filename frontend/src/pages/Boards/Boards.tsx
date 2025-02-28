@@ -10,7 +10,7 @@ export type Modals = "create" | "edit" | "delete" | "none";
 
 export const Boards = () => {
   const { user } = useSessionContext();
-  const { data: boards, setData: setBoards } = useFetch<Board>(`http://localhost:5093/api/Tablero/${user?.id}`);
+  const { data: boards, setData: setBoards } = useFetch<Board>(`http://localhost:5093/api/Board/getByUserId/${user?.id}`);
   const [isOpen, setIsOpen] = useState<Modals>("none");
   const [idSelected, setIdSelected] = useState<number>(0);
 
@@ -19,7 +19,7 @@ export const Boards = () => {
   };
 
   const handleAddBoard = (newBoard: Board, newState: Modals) => {
-    const newBoards = [...boards, { ...newBoard, nombreUsuarioPropietario: user ? user?.username : "" }];
+    const newBoards = [...boards, { ...newBoard, ownerUserName: user ? user?.username : "" }];
     setBoards(newBoards);
     setIsOpen(newState);
   };
@@ -31,7 +31,7 @@ export const Boards = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5093/api/Tablero/${idBoard}`, options);
+      const response = await fetch(`http://localhost:5093/api/Board/${idBoard}`, options);
 
       if (!response.ok) {
         throw new Error("Error al conectar con el servidor.");
@@ -50,8 +50,8 @@ export const Boards = () => {
       if (board.id === idBoard) {
         return {
           ...board,
-          nombre: updatedBoard.nombre !== "" ? updatedBoard.nombre : board.nombre,
-          descripcion: updatedBoard.descripcion !== "" ? updatedBoard.descripcion : board.descripcion
+          name: updatedBoard.name !== "" ? updatedBoard.name : board.name,
+          description: updatedBoard.description !== "" ? updatedBoard.description : board.description
         };
       } else {
         return board;
@@ -76,10 +76,10 @@ export const Boards = () => {
             <section>
               <CardHeader>
                 <Link to={`/board/${board.id}`} className="cursor-pointer">
-                  <h2 className="text-2xl font-semibold text-text-light hover:underline">{board.nombre}</h2>
+                  <h2 className="text-2xl font-semibold text-text-light hover:underline">{board.name}</h2>
                 </Link >
                 {
-                  user.username === board.nombreUsuarioPropietario &&
+                  user.username === board.ownerUserName &&
                   <CardActions idBoard={board.id} onDeleteBoard={handleDeleteBoard} onUpdateBoard={(idBoard: number) => {
                     setIsOpen("edit");
                     setIdSelected(idBoard);
@@ -88,12 +88,12 @@ export const Boards = () => {
               </CardHeader >
               <CardBody>
                 <section className="overflow-hidden">
-                  <p className={"text-base font-normal text-text-muted"}>{board.descripcion}</p>
+                  <p className={"text-base font-normal text-text-muted"}>{board.description}</p>
                 </section>
               </CardBody>
             </section>
             <CardFooter>
-              <span className="text-xs font-normal text-primary-medium">Creado por {board.nombreUsuarioPropietario}</span>
+              <span className="text-xs font-normal text-primary-medium">Creado por {board.ownerUserName}</span>
             </CardFooter>
           </BoardCard>)}
         <ButtonAddBoard onModal={handleModal} />

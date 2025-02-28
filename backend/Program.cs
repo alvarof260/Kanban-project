@@ -4,8 +4,8 @@ using Kanban.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddScoped<ITableroRepository, TableroRepository>();
-builder.Services.AddScoped<ITareaRepository, TareaRepository>();
+builder.Services.AddScoped<IBoardRepository, BoardRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 string connectionString = builder.Configuration.GetConnectionString("SqliteConnection")!.ToString();
