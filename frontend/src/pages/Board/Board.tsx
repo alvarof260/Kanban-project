@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { CardBody, CardFooter, CardHeader, CustomModal } from "../../components";
+import { CardBody, CardFooter, CardHeader, CustomModal, Toast } from "../../components";
 import { ESTADOS } from "../../constants";
 import { Board, Task } from "../../models";
 import { ColumnTask, TitleColumn, GroupTask, TaskCard, FormTask, FormTaskCreate, TaskUpdateValues, CardActions } from "./components";
@@ -20,7 +20,6 @@ export const BoardKanban = () => {
     nombreUsuarioAsignado: ""
   });
   const [board, setBoard] = useState<Board | null>(null);
-
 
   useEffect(() => {
     const fetchBoard = async () => {

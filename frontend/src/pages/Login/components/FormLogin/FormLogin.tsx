@@ -2,7 +2,7 @@ import { ApiResponse, LoginSchema, LoginValues, User } from "../../../../models"
 import { useSessionContext } from "../../../../contexts/session.context";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InputForm } from "../../../../components";
+import { InputForm, Toast } from "../../../../components";
 import { useState } from "react";
 
 
@@ -78,19 +78,7 @@ export const LoginForm = () => {
       </form>
       {
         error && (
-          <article
-            className={`absolute bottom-4 right-4 bg-background-primary h-auto px-6 py-3 border border-accent-dark/30 rounded-md shadow-lg flex items-center 
-        transition-all duration-300 ease-in-out transform ${error ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-          >
-            <button
-              className="absolute top-2 right-2 text-accent-dark text-lg cursor-pointer hover:text-text-light transition ease-in duration-100"
-              onClick={() => setError(null)}
-            >
-              x
-            </button>
-            <p className="text-text-light text-sm">{error}</p>
-          </article>
+          <Toast error={error} onCloseToast={() => setError(null)} />
         )
       }
     </>
