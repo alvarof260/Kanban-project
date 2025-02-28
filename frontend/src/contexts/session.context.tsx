@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 
 interface SessionContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -14,6 +15,7 @@ interface Props {
 
 const SessionContext = createContext<SessionContextType>({
   user: null,
+  setUser: () => { },
   login: () => { },
   logout: () => { }
 });
@@ -53,7 +55,7 @@ export const SessionProvider = ({ children }: Props) => {
   };
 
   return (
-    <SessionContext.Provider value={{ user, login, logout }}>
+    <SessionContext.Provider value={{ user, setUser, login, logout }}>
       {children}
     </SessionContext.Provider>
   );

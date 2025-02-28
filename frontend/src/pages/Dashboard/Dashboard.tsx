@@ -3,11 +3,13 @@ import { useFetch } from "../../hooks";
 import { User } from "../../models";
 import { CustomModal } from "../../components";
 import { CreateUserForm, UpdateUserForm } from "./components";
+import { useSessionContext } from "../../contexts/session.context";
 
 export const Dashboard = () => {
   const { data: users, setData: setUsers } = useFetch<User>("http://localhost:5093/api/User");
   const [idSelected, setIdSelected] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<"none" | "create" | "edit">("none");
+  const { setUser } = useSessionContext();
 
   console.log(users);
 
@@ -30,6 +32,7 @@ export const Dashboard = () => {
     const newUsers = users.map((user) =>
       user.id === id ? updatedUser : user
     );
+    setUser({ ...updatedUser, id });
     setUsers(newUsers);
     setIsOpen("none");
   };

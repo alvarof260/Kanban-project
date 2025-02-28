@@ -67,7 +67,7 @@ export const FormTask = ({ stateInitial, idTask, isOwnerBoard, onUpdateTask }: F
   return (
     <form className="flex flex-col justify-center w-full gap-4" onSubmit={handleSubmit(onSubmit)}>
       {
-        (isOwnerBoard || user?.roleUser) &&
+        (isOwnerBoard || user?.roleUser === 1) &&
         <>
           <InputForm
             name="name"
